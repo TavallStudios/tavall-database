@@ -34,15 +34,7 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
             return;
         }
 
-        try {
-            client.close();
-        } catch (RuntimeException exception) {
-            RedisConnectionException redisConnectionException = new RedisConnectionException(
-                    "Unable to close Redis client.",
-                    exception
-            );
-            Log.exception(redisConnectionException);
-        }
+        // JedisPooled is the handler-owned shared pool. Per-operation callers should not close it.
     }
 
     @Override

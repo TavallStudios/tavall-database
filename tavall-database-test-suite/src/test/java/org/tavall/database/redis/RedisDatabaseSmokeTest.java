@@ -61,6 +61,15 @@ class RedisDatabaseSmokeTest {
             assertEquals("OK", setResult);
             assertEquals(value, client.get(key));
             assertEquals(1L, client.del(key));
+
+            database.connections().closeClient(client);
+            assertTrue(database.isAvailable());
+
+            JedisPooled reopenedClient = database.connections().openClient().orElseThrow();
+            String reopenedValue = value + "-reopened";
+            assertEquals("OK", reopenedClient.set(key, reopenedValue));
+            assertEquals(reopenedValue, reopenedClient.get(key));
+            assertEquals(1L, reopenedClient.del(key));
         } finally {
             if (client != null) {
                 client.del(config.key());
