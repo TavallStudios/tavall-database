@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.tavall</groupId>
+        <groupId>org.tavall</groupId>
         <artifactId>tavall-database</artifactId>
         <version>1.0.0</version>
     </parent>
@@ -15,27 +15,27 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.tavall</groupId>
+            <groupId>org.tavall</groupId>
             <artifactId>tavall-database-core-contracts</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.tavall</groupId>
+            <groupId>org.tavall</groupId>
             <artifactId>tavall-database-postgres</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.tavall</groupId>
+            <groupId>org.tavall</groupId>
             <artifactId>tavall-database-mongo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.tavall</groupId>
+            <groupId>org.tavall</groupId>
             <artifactId>tavall-database-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.tavall</groupId>
+            <groupId>org.tavall</groupId>
             <artifactId>tavall-database-qdrant</artifactId>
             <version>${project.version}</version>
         </dependency>
