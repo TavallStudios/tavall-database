@@ -14,3 +14,4 @@ public interface IJdbcDatabaseBuilder<D extends IDatabase, B extends IJdbcDataba
 
     B readOnly(boolean readOnly);
 }
+

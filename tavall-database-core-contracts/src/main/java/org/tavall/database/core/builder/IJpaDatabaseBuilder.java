@@ -14,3 +14,4 @@ public interface IJpaDatabaseBuilder<D extends IDatabase, B extends IJpaDatabase
 
     B showSql(boolean showSql);
 }
+

@@ -19,3 +19,4 @@ public final class RedisDatabaseType implements IDatabaseType<IRedisDatabase, IR
         return RedisDatabaseBuilder.create();
     }
 }
+

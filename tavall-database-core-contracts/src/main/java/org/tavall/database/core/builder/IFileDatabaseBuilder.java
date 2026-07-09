@@ -12,3 +12,4 @@ public interface IFileDatabaseBuilder<D extends IDatabase, B extends IFileDataba
 
     B readOnly(boolean readOnly);
 }
+

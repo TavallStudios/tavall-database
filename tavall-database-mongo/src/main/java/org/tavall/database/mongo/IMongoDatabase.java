@@ -18,3 +18,4 @@ public interface IMongoDatabase extends IDatabase {
     @Override
     IMongoQueryHandler queries();
 }
+

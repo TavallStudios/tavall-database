@@ -119,3 +119,4 @@ public record RemoteQdrantDatabaseConfig(
         return decodedUserInfo.substring(separatorIndex + 1);
     }
 }
+

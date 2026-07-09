@@ -167,3 +167,4 @@ public final class PostgresQueryHandler implements IPostgresQueryHandler {
         return sql.replaceAll("\\s+", " ").trim();
     }
 }
+

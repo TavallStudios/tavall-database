@@ -52,3 +52,4 @@ public final class MongoDatabase extends AbstractDatabase<IMongoConfigData> impl
         connections.close();
     }
 }
+

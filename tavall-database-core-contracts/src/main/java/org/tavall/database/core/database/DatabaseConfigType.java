@@ -8,3 +8,4 @@ public enum DatabaseConfigType {
     DATA_SOURCE,
     JPA
 }
+

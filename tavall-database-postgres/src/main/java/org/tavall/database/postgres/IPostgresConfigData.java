@@ -31,3 +31,4 @@ public interface IPostgresConfigData extends IDatabaseConfigData {
 
     boolean shouldShowSql();
 }
+

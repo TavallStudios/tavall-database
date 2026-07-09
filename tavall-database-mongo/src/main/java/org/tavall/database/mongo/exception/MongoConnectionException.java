@@ -10,3 +10,4 @@ public class MongoConnectionException extends RuntimeException {
         super(message, cause);
     }
 }
+

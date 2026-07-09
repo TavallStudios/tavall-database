@@ -52,3 +52,4 @@ public final class QdrantDatabase extends AbstractDatabase<IQdrantConfigData> im
         connections.close();
     }
 }
+

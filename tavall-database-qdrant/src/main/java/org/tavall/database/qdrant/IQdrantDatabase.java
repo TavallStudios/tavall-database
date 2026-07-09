@@ -18,3 +18,4 @@ public interface IQdrantDatabase extends IDatabase {
     @Override
     IQdrantQueryHandler queries();
 }
+

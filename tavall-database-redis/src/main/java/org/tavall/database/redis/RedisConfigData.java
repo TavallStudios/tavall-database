@@ -75,3 +75,4 @@ public final class RedisConfigData implements IRedisConfigData {
         return value;
     }
 }
+

@@ -10,3 +10,4 @@ public class RedisDatabaseException extends RuntimeException {
         super(message, cause);
     }
 }
+

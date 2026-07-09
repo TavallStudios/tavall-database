@@ -13,3 +13,4 @@ public interface IDatabaseQueryHandler {
 
     <T> List<T> queryList(String sql, IDatabaseResultMapper<T> resultMapper, Object... params);
 }
+

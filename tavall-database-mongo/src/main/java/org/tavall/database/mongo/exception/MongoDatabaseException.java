@@ -10,3 +10,4 @@ public class MongoDatabaseException extends RuntimeException {
         super(message, cause);
     }
 }
+

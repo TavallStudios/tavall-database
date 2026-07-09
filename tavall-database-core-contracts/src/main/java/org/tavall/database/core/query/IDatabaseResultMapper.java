@@ -8,3 +8,4 @@ public interface IDatabaseResultMapper<T> {
 
     T map(ResultSet resultSet) throws SQLException;
 }
+

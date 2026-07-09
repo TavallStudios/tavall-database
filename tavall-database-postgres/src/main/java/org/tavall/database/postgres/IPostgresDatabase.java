@@ -18,3 +18,4 @@ public interface IPostgresDatabase extends IDatabase {
     @Override
     IPostgresQueryHandler queries();
 }
+

@@ -10,3 +10,4 @@ public final class DatabaseBuilderException extends IllegalStateException {
         super(message, cause);
     }
 }
+

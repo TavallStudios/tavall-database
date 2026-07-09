@@ -8,3 +8,4 @@ public interface IMemoryDatabaseBuilder<D extends IDatabase, B extends IMemoryDa
 
     B databaseName(String databaseName);
 }
+

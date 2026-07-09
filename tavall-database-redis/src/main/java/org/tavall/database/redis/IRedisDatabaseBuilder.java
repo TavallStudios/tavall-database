@@ -7,3 +7,4 @@ public interface IRedisDatabaseBuilder
 
     IRedisDatabaseBuilder databaseIndex(int databaseIndex);
 }
+

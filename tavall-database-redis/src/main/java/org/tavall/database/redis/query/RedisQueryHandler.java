@@ -44,3 +44,4 @@ public final class RedisQueryHandler implements IRedisQueryHandler {
         Log.exception(exception);
     }
 }
+

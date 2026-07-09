@@ -7,3 +7,4 @@ public interface IPostgresDatabaseBuilder
         extends IJdbcDatabaseBuilder<IPostgresDatabase, IPostgresDatabaseBuilder>,
                 IJpaDatabaseBuilder<IPostgresDatabase, IPostgresDatabaseBuilder> {
 }
+

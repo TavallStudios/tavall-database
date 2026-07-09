@@ -10,3 +10,4 @@ public final class DatabaseQueryException extends IllegalStateException {
         super(message, cause);
     }
 }
+

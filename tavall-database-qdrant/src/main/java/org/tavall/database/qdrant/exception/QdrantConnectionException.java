@@ -10,3 +10,4 @@ public class QdrantConnectionException extends RuntimeException {
         super(message, cause);
     }
 }
+

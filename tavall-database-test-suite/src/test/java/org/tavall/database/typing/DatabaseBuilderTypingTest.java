@@ -111,3 +111,4 @@ final class DatabaseBuilderTypingTest {
         assertThrows(NoSuchMethodException.class, () -> type.getMethod(methodName, parameterTypes));
     }
 }
+

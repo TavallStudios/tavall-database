@@ -25,3 +25,4 @@ public interface IRedisConfigData extends IDatabaseConfigData {
 
     int getDatabaseIndex();
 }
+

@@ -10,3 +10,4 @@ public class QdrantQueryException extends RuntimeException {
         super(message, cause);
     }
 }
+

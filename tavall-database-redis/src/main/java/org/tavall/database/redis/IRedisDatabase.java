@@ -18,3 +18,4 @@ public interface IRedisDatabase extends IDatabase {
     @Override
     IRedisQueryHandler queries();
 }
+

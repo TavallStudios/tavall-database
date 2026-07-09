@@ -99,3 +99,4 @@ public final class PostgresConnectionHandler implements IPostgresConnectionHandl
     public void close() {
     }
 }
+

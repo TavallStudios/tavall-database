@@ -6,3 +6,4 @@ public interface IDatabaseBuilder<D extends IDatabase> {
 
     Optional<D> build();
 }
+

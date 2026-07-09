@@ -19,3 +19,4 @@ public final class MongoDatabaseType implements IDatabaseType<IMongoDatabase, IM
         return MongoDatabaseBuilder.create();
     }
 }
+

@@ -44,3 +44,4 @@ public final class MongoQueryHandler implements IMongoQueryHandler {
         Log.exception(exception);
     }
 }
+

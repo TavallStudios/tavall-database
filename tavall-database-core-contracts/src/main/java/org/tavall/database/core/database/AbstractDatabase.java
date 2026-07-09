@@ -35,3 +35,4 @@ public abstract class AbstractDatabase<C extends IDatabaseConfigData> implements
     public void close() {
     }
 }
+

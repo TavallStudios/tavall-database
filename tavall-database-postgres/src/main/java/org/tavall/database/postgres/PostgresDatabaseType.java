@@ -19,3 +19,4 @@ public final class PostgresDatabaseType implements IDatabaseType<IPostgresDataba
         return PostgresDatabaseBuilder.create();
     }
 }
+

@@ -6,3 +6,4 @@ public interface IDatabaseType<D extends IDatabase, B extends IDatabaseBuilder<D
 
     B createBuilder();
 }
+

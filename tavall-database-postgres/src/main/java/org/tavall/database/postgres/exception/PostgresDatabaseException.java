@@ -10,3 +10,4 @@ public final class PostgresDatabaseException extends IllegalStateException {
         super(message, cause);
     }
 }
+

@@ -18,3 +18,4 @@ public interface IMongoConnectionHandler extends AutoCloseable {
     @Override
     void close();
 }
+

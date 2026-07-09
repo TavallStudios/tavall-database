@@ -52,3 +52,4 @@ public final class RedisDatabase extends AbstractDatabase<IRedisConfigData> impl
         connections.close();
     }
 }
+

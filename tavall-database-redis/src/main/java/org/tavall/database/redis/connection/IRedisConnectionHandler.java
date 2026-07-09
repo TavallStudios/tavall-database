@@ -15,3 +15,4 @@ public interface IRedisConnectionHandler extends AutoCloseable {
     @Override
     void close();
 }
+

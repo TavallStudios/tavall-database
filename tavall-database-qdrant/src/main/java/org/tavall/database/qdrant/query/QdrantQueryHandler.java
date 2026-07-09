@@ -44,3 +44,4 @@ public final class QdrantQueryHandler implements IQdrantQueryHandler {
         Log.exception(exception);
     }
 }
+

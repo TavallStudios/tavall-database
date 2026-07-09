@@ -25,3 +25,4 @@ public interface IQdrantConfigData extends IDatabaseConfigData {
 
     String getCollectionName();
 }
+

@@ -15,3 +15,4 @@ public interface IDatabase extends AutoCloseable {
     @Override
     void close();
 }
+

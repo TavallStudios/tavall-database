@@ -14,3 +14,4 @@ public interface IPostgresConnectionHandler extends AutoCloseable {
     @Override
     void close();
 }
+

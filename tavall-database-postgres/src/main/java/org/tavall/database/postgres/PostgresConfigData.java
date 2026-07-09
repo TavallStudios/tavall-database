@@ -93,3 +93,4 @@ public final class PostgresConfigData implements IPostgresConfigData {
         return value;
     }
 }
+

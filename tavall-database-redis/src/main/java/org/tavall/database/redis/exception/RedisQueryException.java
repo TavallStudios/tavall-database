@@ -10,3 +10,4 @@ public class RedisQueryException extends RuntimeException {
         super(message, cause);
     }
 }
+

@@ -7,3 +7,4 @@ public interface IQdrantDatabaseBuilder
 
     IQdrantDatabaseBuilder collectionName(String collectionName);
 }
+

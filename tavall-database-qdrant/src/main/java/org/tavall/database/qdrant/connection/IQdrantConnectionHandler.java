@@ -12,3 +12,4 @@ public interface IQdrantConnectionHandler extends AutoCloseable {
     @Override
     void close();
 }
+

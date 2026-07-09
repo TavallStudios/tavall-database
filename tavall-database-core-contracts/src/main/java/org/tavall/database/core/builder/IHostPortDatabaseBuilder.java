@@ -16,3 +16,4 @@ public interface IHostPortDatabaseBuilder<D extends IDatabase, B extends IHostPo
 
     B readOnly(boolean readOnly);
 }
+

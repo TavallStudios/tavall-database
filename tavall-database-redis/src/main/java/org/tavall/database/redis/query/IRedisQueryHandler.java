@@ -4,3 +4,4 @@ import org.tavall.database.core.query.IDatabaseQueryHandler;
 
 public interface IRedisQueryHandler extends IDatabaseQueryHandler {
 }
+

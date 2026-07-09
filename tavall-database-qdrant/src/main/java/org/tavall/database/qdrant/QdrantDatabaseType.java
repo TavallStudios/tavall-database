@@ -19,3 +19,4 @@ public final class QdrantDatabaseType implements IDatabaseType<IQdrantDatabase, 
         return QdrantDatabaseBuilder.create();
     }
 }
+

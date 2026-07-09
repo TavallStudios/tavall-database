@@ -64,3 +64,4 @@ public final class QdrantConnectionHandler implements IQdrantConnectionHandler {
         return "http://" + configData.getHost() + ":" + configData.getPort();
     }
 }
+

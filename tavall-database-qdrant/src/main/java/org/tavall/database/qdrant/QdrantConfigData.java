@@ -75,3 +75,4 @@ public final class QdrantConfigData implements IQdrantConfigData {
         return value;
     }
 }
+

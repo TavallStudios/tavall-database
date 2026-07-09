@@ -52,3 +52,4 @@ public final class PostgresDatabase extends AbstractDatabase<IPostgresConfigData
         connections.close();
     }
 }
+

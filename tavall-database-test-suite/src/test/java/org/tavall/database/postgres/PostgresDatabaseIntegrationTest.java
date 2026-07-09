@@ -125,3 +125,4 @@ class PostgresDatabaseIntegrationTest {
         }
     }
 }
+
