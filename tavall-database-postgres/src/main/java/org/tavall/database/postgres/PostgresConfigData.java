@@ -74,7 +74,7 @@ public final class PostgresConfigData implements IPostgresConfigData {
 
     @Override
     public DatabaseConfigType getConfigType() {
-        return DatabaseConfigType.JDBC;
+        return isJpaConfigured() ? DatabaseConfigType.JPA : DatabaseConfigType.JDBC;
     }
 
     @Override
