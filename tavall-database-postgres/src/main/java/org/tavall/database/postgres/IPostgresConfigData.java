@@ -27,8 +27,13 @@ public interface IPostgresConfigData extends IDatabaseConfigData {
 
     List<String> getEntityPackages();
 
+    List<Class<?>> getEntityClasses();
+
+    ClassLoader getEntityClassLoader();
+
+    boolean isJpaConfigured();
+
     boolean shouldGenerateSchema();
 
     boolean shouldShowSql();
 }
-
