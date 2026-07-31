@@ -59,6 +59,7 @@ final class PostgresJpaHandler implements IPostgresJpaHandler {
 
         EntityManager entityManager = null;
         EntityTransaction transaction = null;
+        Throwable failure = null;
         boolean userOperationStarted = false;
         boolean userOperationCompleted = false;
         try {
@@ -76,16 +77,20 @@ final class PostgresJpaHandler implements IPostgresJpaHandler {
             transaction.commit();
             return result;
         } catch (RuntimeException | Error exception) {
+            failure = exception;
             rollback(transaction, exception);
             if (userOperationStarted && !userOperationCompleted) {
                 throw exception;
             }
-            throw new PostgresJpaException(
+
+            PostgresJpaException transactionFailure = new PostgresJpaException(
                     "Unable to complete PostgreSQL JPA " + operationName + " transaction.",
                     exception
             );
+            failure = transactionFailure;
+            throw transactionFailure;
         } finally {
-            closeEntityManager(entityManager);
+            closeEntityManager(entityManager, failure);
         }
     }
 
@@ -109,7 +114,7 @@ final class PostgresJpaHandler implements IPostgresJpaHandler {
         }
     }
 
-    private void closeEntityManager(EntityManager entityManager) {
+    private void closeEntityManager(EntityManager entityManager, Throwable activeFailure) {
         if (entityManager == null) {
             return;
         }
@@ -119,6 +124,10 @@ final class PostgresJpaHandler implements IPostgresJpaHandler {
                 entityManager.close();
             }
         } catch (RuntimeException closeFailure) {
+            if (activeFailure != null) {
+                activeFailure.addSuppressed(closeFailure);
+                return;
+            }
             throw new PostgresJpaException("Unable to close the PostgreSQL JPA entity manager.", closeFailure);
         }
     }
