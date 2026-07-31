@@ -32,4 +32,12 @@ jobs:
           "$RUNNER_TEMP/tavall-logging/gradlew" -p "$RUNNER_TEMP/tavall-logging" \
             --no-daemon --max-workers=1 -I "$RUNNER_TEMP/tavall-version.init.gradle" \
             -x test publishToMavenLocal
-      - run: ./gradlew --no-daemon clean check publishToMavenLocal
+      - name: Generate locks and validate
+        run: ./gradlew --no-daemon --max-workers=1 --write-locks clean check publishToMavenLocal
+      - name: Upload generated dependency locks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-gradle-locks
+          path: '**/gradle.lockfile'
+          if-no-files-found: error
