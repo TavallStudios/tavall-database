@@ -1,9 +1,12 @@
 package org.tavall.database.postgres.connection;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Optional;
 
 public interface IPostgresConnectionHandler extends AutoCloseable {
+
+    DataSource dataSource();
 
     Optional<Connection> openConnection();
 
@@ -14,4 +17,3 @@ public interface IPostgresConnectionHandler extends AutoCloseable {
     @Override
     void close();
 }
-
