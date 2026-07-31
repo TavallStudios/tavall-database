@@ -5,6 +5,7 @@ import org.tavall.database.postgres.IPostgresConfigData;
 import org.tavall.database.postgres.exception.PostgresConnectionException;
 import org.tavall.logging.Log;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Optional;
@@ -28,6 +29,11 @@ public final class PostgresConnectionHandler implements IPostgresConnectionHandl
         if (password != null) {
             this.dataSource.setPassword(password);
         }
+    }
+
+    @Override
+    public DataSource dataSource() {
+        return dataSource;
     }
 
     @Override
@@ -99,4 +105,3 @@ public final class PostgresConnectionHandler implements IPostgresConnectionHandl
     public void close() {
     }
 }
-
