@@ -1,6 +1,7 @@
 package org.tavall.database.postgres;
 
 import org.junit.jupiter.api.Test;
+import org.tavall.database.core.database.DatabaseConfigType;
 import org.tavall.database.postgres.exception.PostgresJpaException;
 import org.tavall.database.postgres.jpa.fixtures.TestJpaEntity;
 
@@ -19,6 +20,7 @@ class PostgresDatabaseBuilderJpaTest {
                 .orElseThrow();
 
         try {
+            assertEquals(DatabaseConfigType.JDBC, database.getConfigData().getConfigType());
             assertFalse(database.jpa().isConfigured());
             assertFalse(database.jpa().isOpen());
             assertThrows(PostgresJpaException.class, () -> database.jpa().read(entityManager -> null));
@@ -44,6 +46,7 @@ class PostgresDatabaseBuilderJpaTest {
         );
 
         assertTrue(configData.isJpaConfigured());
+        assertEquals(DatabaseConfigType.JPA, configData.getConfigType());
         assertEquals("novus-test", configData.getPersistenceUnitName());
         assertEquals(java.util.List.of(TestJpaEntity.class), configData.getEntityClasses());
         assertEquals(classLoader, configData.getEntityClassLoader());
