@@ -14,7 +14,7 @@ public interface IPostgresJpaHandler extends AutoCloseable {
 
     <T> T read(Function<EntityManager, T> operation);
 
-    default void read(Consumer<EntityManager> operation) {
+    default void readVoid(Consumer<EntityManager> operation) {
         Objects.requireNonNull(operation, "operation");
         read(entityManager -> {
             operation.accept(entityManager);
@@ -24,7 +24,7 @@ public interface IPostgresJpaHandler extends AutoCloseable {
 
     <T> T write(Function<EntityManager, T> operation);
 
-    default void write(Consumer<EntityManager> operation) {
+    default void writeVoid(Consumer<EntityManager> operation) {
         Objects.requireNonNull(operation, "operation");
         write(entityManager -> {
             operation.accept(entityManager);
