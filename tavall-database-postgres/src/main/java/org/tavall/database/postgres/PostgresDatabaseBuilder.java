@@ -3,11 +3,14 @@ package org.tavall.database.postgres;
 import org.tavall.database.postgres.connection.IPostgresConnectionHandler;
 import org.tavall.database.postgres.connection.PostgresConnectionHandler;
 import org.tavall.database.postgres.exception.PostgresDatabaseException;
+import org.tavall.database.postgres.jpa.IPostgresJpaHandler;
+import org.tavall.database.postgres.jpa.PostgresJpaHandlerFactory;
 import org.tavall.database.postgres.query.IPostgresQueryHandler;
 import org.tavall.database.postgres.query.PostgresQueryHandler;
 import org.tavall.logging.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,11 +22,14 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
     private boolean readOnly;
     private String persistenceUnitName;
     private final List<String> entityPackages;
+    private final List<Class<?>> entityClasses;
+    private ClassLoader entityClassLoader;
     private boolean generateSchema;
     private boolean showSql;
 
     private PostgresDatabaseBuilder() {
         this.entityPackages = new ArrayList<>();
+        this.entityClasses = new ArrayList<>();
     }
 
     public static PostgresDatabaseBuilder create() {
@@ -69,6 +75,30 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
     }
 
     @Override
+    public PostgresDatabaseBuilder entityClass(Class<?> entityClass) {
+        if (entityClass != null) {
+            entityClasses.add(entityClass);
+        }
+        return this;
+    }
+
+    @Override
+    public PostgresDatabaseBuilder entityClasses(Class<?>... entityClasses) {
+        if (entityClasses != null) {
+            Arrays.stream(entityClasses)
+                    .filter(entityClass -> entityClass != null)
+                    .forEach(this.entityClasses::add);
+        }
+        return this;
+    }
+
+    @Override
+    public PostgresDatabaseBuilder entityClassLoader(ClassLoader entityClassLoader) {
+        this.entityClassLoader = entityClassLoader;
+        return this;
+    }
+
+    @Override
     public PostgresDatabaseBuilder generateSchema(boolean generateSchema) {
         this.generateSchema = generateSchema;
         return this;
@@ -90,6 +120,8 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
             return Optional.empty();
         }
 
+        IPostgresConnectionHandler connections = null;
+        IPostgresJpaHandler jpa = null;
         try {
             PostgresConfigData configData = new PostgresConfigData(
                     jdbcUrl,
@@ -98,14 +130,18 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
                     readOnly,
                     persistenceUnitName,
                     entityPackages,
+                    entityClasses,
+                    entityClassLoader,
                     generateSchema,
                     showSql
             );
-            IPostgresConnectionHandler connections = new PostgresConnectionHandler(configData);
+            connections = new PostgresConnectionHandler(configData);
             IPostgresQueryHandler queries = new PostgresQueryHandler(connections);
-            IPostgresDatabase database = new PostgresDatabase(configData, connections, queries);
+            jpa = PostgresJpaHandlerFactory.create(configData, connections);
+            IPostgresDatabase database = new PostgresDatabase(configData, connections, jpa, queries);
             return Optional.of(database);
         } catch (RuntimeException exception) {
+            closeAfterFailure(jpa, connections, exception);
             PostgresDatabaseException postgresDatabaseException = new PostgresDatabaseException(
                     "Unable to build PostgreSQL database.",
                     exception
@@ -115,5 +151,24 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
         }
     }
 
+    private void closeAfterFailure(
+            IPostgresJpaHandler jpa,
+            IPostgresConnectionHandler connections,
+            RuntimeException buildFailure
+    ) {
+        if (jpa != null) {
+            try {
+                jpa.close();
+            } catch (RuntimeException closeFailure) {
+                buildFailure.addSuppressed(closeFailure);
+            }
+        }
+        if (connections != null) {
+            try {
+                connections.close();
+            } catch (RuntimeException closeFailure) {
+                buildFailure.addSuppressed(closeFailure);
+            }
+        }
+    }
 }
-
