@@ -17,12 +17,16 @@ public final class PostgresJpaHandlerFactory {
     private PostgresJpaHandlerFactory() {
     }
 
+    public static IPostgresJpaHandler unconfigured() {
+        return UnconfiguredPostgresJpaHandler.INSTANCE;
+    }
+
     public static IPostgresJpaHandler create(
             IPostgresConfigData configData,
             IPostgresConnectionHandler connections
     ) {
         if (!configData.isJpaConfigured()) {
-            return UnconfiguredPostgresJpaHandler.INSTANCE;
+            return unconfigured();
         }
 
         List<Class<?>> entityClasses = JpaEntityClassResolver.resolve(configData);
