@@ -112,7 +112,10 @@ project(":tavall-database-postgres") {
         "api"(project(":tavall-database-core-contracts"))
         "api"(postgresql)
         "api"(jakartaPersistence)
+        "compileOnly"(hibernateOrm)
         "runtimeOnly"(hibernateOrm)
+        "testImplementation"(junitJupiter)
+        "testRuntimeOnly"(junitPlatformLauncher)
     }
 }
 
