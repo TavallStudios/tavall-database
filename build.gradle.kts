@@ -7,6 +7,7 @@ plugins {
 group = "org.tavall"
 version = "1.0.0"
 
+val h2 = libs.h2
 val hibernateOrm = libs.hibernate.orm
 val jakartaPersistence = libs.jakarta.persistence
 val jacksonDatabind = libs.jackson.databind
@@ -115,6 +116,7 @@ project(":tavall-database-postgres") {
         "compileOnly"(hibernateOrm)
         "runtimeOnly"(hibernateOrm)
         "testImplementation"(junitJupiter)
+        "testRuntimeOnly"(h2)
         "testRuntimeOnly"(junitPlatformLauncher)
     }
 }
