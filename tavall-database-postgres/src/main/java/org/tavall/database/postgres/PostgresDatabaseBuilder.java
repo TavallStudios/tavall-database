@@ -3,6 +3,8 @@ package org.tavall.database.postgres;
 import org.tavall.database.postgres.connection.IPostgresConnectionHandler;
 import org.tavall.database.postgres.connection.PostgresConnectionHandler;
 import org.tavall.database.postgres.exception.PostgresDatabaseException;
+import org.tavall.database.postgres.jpa.IPostgresJpaContext;
+import org.tavall.database.postgres.jpa.PostgresJpaContext;
 import org.tavall.database.postgres.query.IPostgresQueryHandler;
 import org.tavall.database.postgres.query.PostgresQueryHandler;
 import org.tavall.logging.Log;
@@ -63,7 +65,7 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
     @Override
     public PostgresDatabaseBuilder entityPackage(String entityPackage) {
         if (entityPackage != null && !entityPackage.isBlank()) {
-            entityPackages.add(entityPackage);
+            entityPackages.add(entityPackage.trim());
         }
         return this;
     }
@@ -102,8 +104,17 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
                     showSql
             );
             IPostgresConnectionHandler connections = new PostgresConnectionHandler(configData);
+            IPostgresJpaContext jpa = new PostgresJpaContext(
+                    configData,
+                    resolveApplicationClassLoader()
+            );
             IPostgresQueryHandler queries = new PostgresQueryHandler(connections);
-            IPostgresDatabase database = new PostgresDatabase(configData, connections, queries);
+            IPostgresDatabase database = new PostgresDatabase(
+                    configData,
+                    connections,
+                    jpa,
+                    queries
+            );
             return Optional.of(database);
         } catch (RuntimeException exception) {
             PostgresDatabaseException postgresDatabaseException = new PostgresDatabaseException(
@@ -115,5 +126,11 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
         }
     }
 
+    private ClassLoader resolveApplicationClassLoader() {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        if (contextClassLoader != null) {
+            return contextClassLoader;
+        }
+        return PostgresDatabaseBuilder.class.getClassLoader();
+    }
 }
-
