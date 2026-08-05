@@ -3,6 +3,7 @@
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :tavall-database-postgres:dependencies --write-locks
 com.fasterxml:classmate:1.5.1=runtimeClasspath,testRuntimeClasspath
+com.h2database:h2:2.4.240=testRuntimeClasspath
 com.sun.istack:istack-commons-runtime:4.1.1=runtimeClasspath,testRuntimeClasspath
 io.smallrye:jandex:3.2.0=runtimeClasspath,testRuntimeClasspath
 jakarta.activation:jakarta.activation-api:2.1.1=runtimeClasspath,testRuntimeClasspath
