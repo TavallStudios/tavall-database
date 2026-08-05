@@ -3,6 +3,7 @@ package org.tavall.database.postgres;
 import org.tavall.database.core.database.IDatabase;
 import org.tavall.database.core.database.IDatabaseType;
 import org.tavall.database.postgres.connection.IPostgresConnectionHandler;
+import org.tavall.database.postgres.jpa.IPostgresJpaContext;
 import org.tavall.database.postgres.query.IPostgresQueryHandler;
 
 public interface IPostgresDatabase extends IDatabase {
@@ -15,7 +16,8 @@ public interface IPostgresDatabase extends IDatabase {
 
     IPostgresConnectionHandler connections();
 
+    IPostgresJpaContext jpa();
+
     @Override
     IPostgresQueryHandler queries();
 }
-
