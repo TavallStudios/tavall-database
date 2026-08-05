@@ -12,6 +12,8 @@ public final class PostgresJpaContext implements IPostgresJpaContext {
     private final IPostgresConfigData configData;
     private final ClassLoader classLoader;
     private final PostgresJpaBootstrap bootstrap;
+    private final boolean readOnly;
+    private final boolean closeFactoryOnClose;
 
     private EntityManagerFactory entityManagerFactory;
     private int activeOperations;
@@ -24,6 +26,31 @@ public final class PostgresJpaContext implements IPostgresJpaContext {
         this.configData = Objects.requireNonNull(configData, "configData");
         this.classLoader = classLoader;
         this.bootstrap = new PostgresJpaBootstrap();
+        this.readOnly = configData.isReadOnly();
+        this.closeFactoryOnClose = true;
+    }
+
+    private PostgresJpaContext(
+            EntityManagerFactory entityManagerFactory,
+            boolean closeFactoryOnClose
+    ) {
+        this.configData = null;
+        this.classLoader = null;
+        this.bootstrap = null;
+        this.readOnly = false;
+        this.closeFactoryOnClose = closeFactoryOnClose;
+        this.entityManagerFactory = Objects.requireNonNull(
+                entityManagerFactory,
+                "entityManagerFactory"
+        );
+    }
+
+    public static PostgresJpaContext owned(EntityManagerFactory entityManagerFactory) {
+        return new PostgresJpaContext(entityManagerFactory, true);
+    }
+
+    public static PostgresJpaContext borrowed(EntityManagerFactory entityManagerFactory) {
+        return new PostgresJpaContext(entityManagerFactory, false);
     }
 
     @Override
@@ -56,7 +83,7 @@ public final class PostgresJpaContext implements IPostgresJpaContext {
     @Override
     public <T> T write(Function<EntityManager, T> operation) {
         Objects.requireNonNull(operation, "operation");
-        if (configData.isReadOnly()) {
+        if (readOnly) {
             throw new IllegalStateException(
                     "PostgreSQL database is configured as read-only"
             );
@@ -114,6 +141,11 @@ public final class PostgresJpaContext implements IPostgresJpaContext {
     private EntityManagerFactory initializeIfNeeded() {
         requireOpen();
         if (entityManagerFactory == null) {
+            if (bootstrap == null || configData == null) {
+                throw new IllegalStateException(
+                        "PostgreSQL JPA context has no factory or bootstrap configuration"
+                );
+            }
             entityManagerFactory = bootstrap.createEntityManagerFactory(
                     configData,
                     classLoader
@@ -144,7 +176,8 @@ public final class PostgresJpaContext implements IPostgresJpaContext {
     }
 
     private void closeFactoryIfDrained() {
-        if (closeRequested
+        if (closeFactoryOnClose
+                && closeRequested
                 && activeOperations == 0
                 && entityManagerFactory != null
                 && entityManagerFactory.isOpen()) {
