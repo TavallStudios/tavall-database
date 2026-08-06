@@ -3,6 +3,9 @@ package org.tavall.database.postgres;
 import org.junit.jupiter.api.Test;
 import org.tavall.database.postgres.fixture.JpaProbeEntity;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class PostgresJpaIntegrationTest {
 
     @Test
-    void scansEntitiesAndOwnsReadWriteTransactions() {
+    void scansEntitiesAndOwnsEntityOperations() {
         IPostgresDatabase database = PostgresDatabaseBuilder.create()
                 .jdbcUrl("jdbc:h2:mem:tavall_jpa;DB_CLOSE_DELAY=-1")
                 .username("sa")
@@ -22,22 +25,56 @@ final class PostgresJpaIntegrationTest {
                 .orElseThrow();
 
         try {
-            assertFalse(database.jpa().isInitialized());
+            assertTrue(database.entities().isOpen());
 
-            database.jpa().write(entityManager -> {
-                entityManager.persist(new JpaProbeEntity("probe", "ready"));
-                return null;
-            });
+            database.entities().save(new JpaProbeEntity("probe", "ready"));
+            database.entities().saveAll(List.of(
+                    new JpaProbeEntity("second", "ready"),
+                    new JpaProbeEntity("third", "other")
+            ));
 
-            assertTrue(database.jpa().isInitialized());
-            String value = database.jpa().read(entityManager ->
-                    entityManager.find(JpaProbeEntity.class, "probe").getValue()
+            assertEquals(
+                    "ready",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "probe")
+                            .orElseThrow()
+                            .getValue()
             );
-            assertEquals("ready", value);
+            assertEquals(
+                    List.of("probe", "second"),
+                    database.entities().findNamed(
+                                    JpaProbeEntity.class,
+                                    JpaProbeEntity.FIND_BY_VALUE,
+                                    Map.of("value", "ready"),
+                                    25
+                            ).stream()
+                            .map(JpaProbeEntity::getId)
+                            .toList()
+            );
+
+            database.entities().save(
+                    new JpaProbeEntity("probe", "updated")
+            );
+            assertEquals(
+                    "updated",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "probe")
+                            .orElseThrow()
+                            .getValue()
+            );
+
+            assertTrue(database.entities().deleteById(
+                    JpaProbeEntity.class,
+                    "second"
+            ));
+            assertFalse(database.entities().find(
+                    JpaProbeEntity.class,
+                    "second"
+            ).isPresent());
         } finally {
             database.close();
         }
 
-        assertFalse(database.jpa().isOpen());
+        assertFalse(database.entities().isOpen());
     }
 }
