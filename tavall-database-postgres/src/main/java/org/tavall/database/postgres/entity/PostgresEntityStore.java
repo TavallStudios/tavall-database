@@ -41,10 +41,13 @@ public final class PostgresEntityStore implements IPostgresEntityStore {
         LockModeType safeLockMode = lockModeType == null
                 ? LockModeType.NONE
                 : lockModeType;
-        return jpaContext.read(entityManager -> Optional.ofNullable(
-                safeLockMode == LockModeType.NONE
-                        ? entityManager.find(entityType, id)
-                        : entityManager.find(entityType, id, safeLockMode)
+        if (safeLockMode == LockModeType.NONE) {
+            return jpaContext.read(entityManager -> Optional.ofNullable(
+                    entityManager.find(entityType, id)
+            ));
+        }
+        return jpaContext.write(entityManager -> Optional.ofNullable(
+                entityManager.find(entityType, id, safeLockMode)
         ));
     }
 
