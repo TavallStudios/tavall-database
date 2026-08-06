@@ -1,11 +1,13 @@
 package org.tavall.database.postgres.entity;
 
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import org.tavall.database.postgres.jpa.IPostgresJpaContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,9 +57,14 @@ public final class PostgresEntityStore implements IPostgresEntityStore {
     @Override
     public <E> List<E> saveAll(Collection<E> entities) {
         Objects.requireNonNull(entities, "entities");
-        List<E> values = List.copyOf(entities);
-        if (values.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("entities must not contain null");
+        ArrayList<E> values = new ArrayList<>(entities.size());
+        for (E entity : entities) {
+            if (entity == null) {
+                throw new IllegalArgumentException(
+                        "entities must not contain null"
+                );
+            }
+            values.add(entity);
         }
         return jpaContext.write(entityManager -> {
             ArrayList<E> saved = new ArrayList<>(values.size());
@@ -107,9 +114,7 @@ public final class PostgresEntityStore implements IPostgresEntityStore {
     ) {
         Objects.requireNonNull(entityType, "entityType");
         String safeQueryName = requireText(queryName, "queryName");
-        Map<String, ?> safeParameters = parameters == null
-                ? Map.of()
-                : Map.copyOf(parameters);
+        Map<String, ?> safeParameters = copyParameters(parameters);
         int safeMaxResults = maxResults <= 0
                 ? Integer.MAX_VALUE
                 : maxResults;
@@ -149,20 +154,27 @@ public final class PostgresEntityStore implements IPostgresEntityStore {
             Map<String, ?> parameters
     ) {
         String safeQueryName = requireText(queryName, "queryName");
-        Map<String, ?> safeParameters = parameters == null
-                ? Map.of()
-                : Map.copyOf(parameters);
+        Map<String, ?> safeParameters = copyParameters(parameters);
         return jpaContext.write(entityManager -> {
-            var query = entityManager.createNamedQuery(safeQueryName);
+            Query query = entityManager.createNamedQuery(safeQueryName);
             bind(query, safeParameters);
             return query.executeUpdate();
         });
     }
 
-    private void bind(
-            jakarta.persistence.Query query,
-            Map<String, ?> parameters
-    ) {
+    private Map<String, ?> copyParameters(Map<String, ?> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return Map.of();
+        }
+        LinkedHashMap<String, Object> copied = new LinkedHashMap<>();
+        parameters.forEach((name, value) -> copied.put(
+                requireText(name, "parameter name"),
+                value
+        ));
+        return java.util.Collections.unmodifiableMap(copied);
+    }
+
+    private void bind(Query query, Map<String, ?> parameters) {
         parameters.forEach(query::setParameter);
     }
 
