@@ -13,13 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class PostgresJpaIntegrationTest {
 
     @Test
-    void scansEntitiesAndOwnsEntityOperations() {
+    void discoversTavallEntitiesAndOwnsEntityOperations() {
         IPostgresDatabase database = PostgresDatabaseBuilder.create()
                 .jdbcUrl("jdbc:h2:mem:tavall_jpa;DB_CLOSE_DELAY=-1")
                 .username("sa")
                 .password("")
                 .persistenceUnitName("tavall-jpa-integration")
-                .entityPackage("org.tavall.database.postgres.fixture")
                 .generateSchema(true)
                 .build()
                 .orElseThrow();
