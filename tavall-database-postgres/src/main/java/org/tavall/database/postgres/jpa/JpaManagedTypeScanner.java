@@ -5,10 +5,10 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import org.tavall.database.postgres.exception.PostgresDatabaseException;
+import org.tavall.logging.Log;
 
 import java.io.IOException;
 import java.net.JarURLConnection;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,25 +29,43 @@ final class JpaManagedTypeScanner {
                 ? JpaManagedTypeScanner.class.getClassLoader()
                 : classLoader;
         Set<String> classNames = new LinkedHashSet<>();
-        for (String packageName : packageNames == null ? List.<String>of() : packageNames) {
+        for (String packageName : packageNames == null
+                ? List.<String>of()
+                : packageNames) {
             String normalizedPackage = normalizePackage(packageName);
             if (normalizedPackage.isEmpty()) {
                 continue;
             }
-            collectFromResources(effectiveClassLoader, normalizedPackage, classNames);
-            collectFromClassLoaderUrls(effectiveClassLoader, normalizedPackage, classNames);
+            collectFromResources(
+                    effectiveClassLoader,
+                    normalizedPackage,
+                    classNames
+            );
+            collectFromClassLoaderUrls(
+                    effectiveClassLoader,
+                    normalizedPackage,
+                    classNames
+            );
         }
         List<Class<?>> managedTypes = new ArrayList<>();
         classNames.stream().sorted().forEach(className -> {
             try {
-                Class<?> candidate = Class.forName(className, false, effectiveClassLoader);
+                Class<?> candidate = Class.forName(
+                        className,
+                        false,
+                        effectiveClassLoader
+                );
                 if (isManagedType(candidate)) {
                     managedTypes.add(candidate);
                 }
             } catch (ClassNotFoundException | LinkageError exception) {
-                throw new PostgresDatabaseException(
-                        "Unable to load configured JPA type " + className,
-                        exception
+                // Broad Tavall discovery can see optional modules whose runtime
+                // dependencies are intentionally absent from this process.
+                // Those classes cannot be participating managed types here.
+                Log.warn(
+                        "Skipping unavailable class during Tavall JPA discovery: "
+                                + className + " ("
+                                + exception.getClass().getSimpleName() + ")"
                 );
             }
         });
@@ -71,12 +89,14 @@ final class JpaManagedTypeScanner {
                             classNames
                     );
                     case "jar" -> collectJar(
-                            ((JarURLConnection) resource.openConnection()).getJarFile(),
+                            ((JarURLConnection) resource.openConnection())
+                                    .getJarFile(),
                             packagePath,
                             classNames
                     );
                     default -> {
-                        // Application and plugin class loaders generally expose file or jar URLs.
+                        // Application and plugin class loaders generally expose
+                        // file or jar URLs.
                     }
                 }
             }
@@ -106,7 +126,11 @@ final class JpaManagedTypeScanner {
                 if (Files.isDirectory(path)) {
                     Path packageDirectory = path.resolve(packagePath);
                     if (Files.isDirectory(packageDirectory)) {
-                        collectDirectory(packageDirectory, packageName, classNames);
+                        collectDirectory(
+                                packageDirectory,
+                                packageName,
+                                classNames
+                        );
                     }
                 } else if (path.getFileName().toString().endsWith(".jar")) {
                     try (JarFile jarFile = new JarFile(path.toFile())) {
@@ -129,7 +153,8 @@ final class JpaManagedTypeScanner {
     ) {
         try (var files = Files.walk(packageDirectory)) {
             files.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".class"))
+                    .filter(path -> path.getFileName().toString()
+                            .endsWith(".class"))
                     .map(packageDirectory::relativize)
                     .map(Path::toString)
                     .map(name -> toClassName(packageName, name))
@@ -137,7 +162,8 @@ final class JpaManagedTypeScanner {
                     .forEach(classNames::add);
         } catch (IOException exception) {
             throw new PostgresDatabaseException(
-                    "Unable to scan JPA package directory " + packageDirectory,
+                    "Unable to scan JPA package directory "
+                            + packageDirectory,
                     exception
             );
         }
@@ -148,7 +174,9 @@ final class JpaManagedTypeScanner {
             String packagePath,
             Set<String> classNames
     ) {
-        String prefix = packagePath.endsWith("/") ? packagePath : packagePath + "/";
+        String prefix = packagePath.endsWith("/")
+                ? packagePath
+                : packagePath + "/";
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
@@ -156,7 +184,10 @@ final class JpaManagedTypeScanner {
             if (!entry.isDirectory()
                     && name.startsWith(prefix)
                     && name.endsWith(".class")) {
-                String className = name.substring(0, name.length() - ".class".length())
+                String className = name.substring(
+                                0,
+                                name.length() - ".class".length()
+                        )
                         .replace('/', '.');
                 if (isLoadableClassName(className)) {
                     classNames.add(className);
@@ -165,7 +196,10 @@ final class JpaManagedTypeScanner {
         }
     }
 
-    private String toClassName(String packageName, String relativeClassFile) {
+    private String toClassName(
+            String packageName,
+            String relativeClassFile
+    ) {
         String relativeName = relativeClassFile
                 .replace('\\', '.')
                 .replace('/', '.');
