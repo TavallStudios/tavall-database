@@ -65,7 +65,7 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
     }
 
     private String buildRedisUrl(IRedisConfigData configData) {
-        StringBuilder redisUrl = new StringBuilder("redis://");
+        StringBuilder redisUrl = new StringBuilder(configData.isTlsEnabled() ? "rediss://" : "redis://");
         String username = configData.getUsername();
         String password = configData.getPassword();
         boolean hasUsername = username != null && !username.isBlank();
