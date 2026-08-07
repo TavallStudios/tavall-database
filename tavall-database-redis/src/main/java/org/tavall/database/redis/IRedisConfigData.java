@@ -24,5 +24,6 @@ public interface IRedisConfigData extends IDatabaseConfigData {
     String getPassword();
 
     int getDatabaseIndex();
-}
 
+    boolean isTlsEnabled();
+}
