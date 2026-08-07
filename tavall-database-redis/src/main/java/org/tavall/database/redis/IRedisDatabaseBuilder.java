@@ -6,5 +6,6 @@ public interface IRedisDatabaseBuilder
         extends IHostPortDatabaseBuilder<IRedisDatabase, IRedisDatabaseBuilder> {
 
     IRedisDatabaseBuilder databaseIndex(int databaseIndex);
-}
 
+    IRedisDatabaseBuilder tls(boolean enabled);
+}
