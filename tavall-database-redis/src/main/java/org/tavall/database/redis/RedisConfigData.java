@@ -11,6 +11,7 @@ public final class RedisConfigData implements IRedisConfigData {
     private final String password;
     private final boolean readOnly;
     private final int databaseIndex;
+    private final boolean tlsEnabled;
 
     public RedisConfigData(
             String host,
@@ -20,12 +21,25 @@ public final class RedisConfigData implements IRedisConfigData {
             boolean readOnly,
             int databaseIndex
     ) {
+        this(host, port, username, password, readOnly, databaseIndex, false);
+    }
+
+    public RedisConfigData(
+            String host,
+            int port,
+            String username,
+            String password,
+            boolean readOnly,
+            int databaseIndex,
+            boolean tlsEnabled
+    ) {
         this.host = normalizeText(host);
         this.port = port;
         this.username = normalizeText(username);
         this.password = normalizeText(password);
         this.readOnly = readOnly;
         this.databaseIndex = databaseIndex;
+        this.tlsEnabled = tlsEnabled;
     }
 
     @Override
@@ -68,6 +82,11 @@ public final class RedisConfigData implements IRedisConfigData {
         return databaseIndex;
     }
 
+    @Override
+    public boolean isTlsEnabled() {
+        return tlsEnabled;
+    }
+
     private String normalizeText(String value) {
         if (value == null) {
             return "";
@@ -75,4 +94,3 @@ public final class RedisConfigData implements IRedisConfigData {
         return value;
     }
 }
-
