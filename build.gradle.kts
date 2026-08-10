@@ -118,6 +118,7 @@ project(":tavall-database-postgres") {
         "testImplementation"(junitJupiter)
         "testRuntimeOnly"(h2)
         "testRuntimeOnly"(junitPlatformLauncher)
+        "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
     }
 }
 
@@ -168,5 +169,6 @@ project(":tavall-database-test-suite") {
         "api"(project(":tavall-database-qdrant"))
         "testImplementation"(junitJupiter)
         "testRuntimeOnly"(junitPlatformLauncher)
+        "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
     }
 }
