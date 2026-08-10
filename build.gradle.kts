@@ -128,6 +128,7 @@ project(":tavall-database-mongo") {
         "api"(mongodbDriver)
         "testImplementation"(junitJupiter)
         "testRuntimeOnly"(junitPlatformLauncher)
+        "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
     }
 }
 
