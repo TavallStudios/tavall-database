@@ -7,6 +7,8 @@ plugins {
 group = "org.tavall"
 version = "1.0.0"
 
+val h2 = libs.h2
+val hibernateOrm = libs.hibernate.orm
 val jakartaPersistence = libs.jakarta.persistence
 val jacksonDatabind = libs.jackson.databind
 val jacksonBom = libs.jackson.bom
@@ -58,7 +60,13 @@ subprojects {
         val archive = tasks.named<Jar>("jar").flatMap { it.archiveFile }
         inputs.file(archive)
         doLast {
-            val forbidden = listOf("com/fasterxml/", "com/mongodb/", "org/postgresql/", "redis/clients/")
+            val forbidden = listOf(
+                "com/fasterxml/",
+                "com/mongodb/",
+                "org/hibernate/",
+                "org/postgresql/",
+                "redis/clients/",
+            )
             ZipFile(archive.get().asFile).use { jar ->
                 val embedded = jar.entries().asSequence().map { it.name }
                     .firstOrNull { entry -> forbidden.any(entry::startsWith) }
@@ -105,6 +113,11 @@ project(":tavall-database-postgres") {
         "api"(project(":tavall-database-core-contracts"))
         "api"(postgresql)
         "api"(jakartaPersistence)
+        "compileOnly"(hibernateOrm)
+        "runtimeOnly"(hibernateOrm)
+        "testImplementation"(junitJupiter)
+        "testRuntimeOnly"(h2)
+        "testRuntimeOnly"(junitPlatformLauncher)
     }
 }
 
