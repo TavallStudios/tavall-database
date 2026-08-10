@@ -3,6 +3,8 @@ package org.tavall.database.postgres;
 import org.tavall.database.core.database.AbstractDatabase;
 import org.tavall.database.core.database.IDatabaseType;
 import org.tavall.database.postgres.connection.IPostgresConnectionHandler;
+import org.tavall.database.postgres.entity.IPostgresEntityStore;
+import org.tavall.database.postgres.entity.PostgresEntityStore;
 import org.tavall.database.postgres.jpa.IPostgresJpaContext;
 import org.tavall.database.postgres.query.IPostgresQueryHandler;
 
@@ -12,6 +14,7 @@ public final class PostgresDatabase extends AbstractDatabase<IPostgresConfigData
         implements IPostgresDatabase {
 
     private final IPostgresConnectionHandler connections;
+    private final IPostgresEntityStore entities;
     private final IPostgresJpaContext jpa;
     private final IPostgresQueryHandler queries;
 
@@ -24,6 +27,7 @@ public final class PostgresDatabase extends AbstractDatabase<IPostgresConfigData
         super(PostgresDatabaseType.POSTGRES, configData, queries);
         this.connections = Objects.requireNonNull(connections, "connections");
         this.jpa = Objects.requireNonNull(jpa, "jpa");
+        this.entities = new PostgresEntityStore(jpa);
         this.queries = Objects.requireNonNull(queries, "queries");
     }
 
@@ -43,6 +47,12 @@ public final class PostgresDatabase extends AbstractDatabase<IPostgresConfigData
     }
 
     @Override
+    public IPostgresEntityStore entities() {
+        return entities;
+    }
+
+    @Override
+    @Deprecated(forRemoval = false, since = "1.1.0")
     public IPostgresJpaContext jpa() {
         return jpa;
     }

@@ -116,6 +116,7 @@ project(":tavall-database-postgres") {
         "compileOnly"(hibernateOrm)
         "runtimeOnly"(hibernateOrm)
         "testImplementation"(junitJupiter)
+        "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
         "testRuntimeOnly"(h2)
         "testRuntimeOnly"(junitPlatformLauncher)
         "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
