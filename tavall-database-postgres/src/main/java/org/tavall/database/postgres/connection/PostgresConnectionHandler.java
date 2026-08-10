@@ -6,6 +6,7 @@ import org.tavall.database.postgres.exception.PostgresConnectionException;
 import org.tavall.logging.Log;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 
@@ -13,19 +14,24 @@ public final class PostgresConnectionHandler implements IPostgresConnectionHandl
 
     private final IPostgresConfigData configData;
     private final PGSimpleDataSource dataSource;
+    private final boolean h2;
 
     public PostgresConnectionHandler(IPostgresConfigData configData) {
         this.configData = configData;
-        this.dataSource = new PGSimpleDataSource();
-        this.dataSource.setUrl(configData.getJdbcUrl());
+        this.h2 = configData.getJdbcUrl() != null
+                && configData.getJdbcUrl().startsWith("jdbc:h2:");
+        this.dataSource = h2 ? null : new PGSimpleDataSource();
+        if (!h2) {
+            this.dataSource.setUrl(configData.getJdbcUrl());
+        }
 
         String username = configData.getUsername();
-        if (username != null && !username.isBlank()) {
+        if (!h2 && username != null && !username.isBlank()) {
             this.dataSource.setUser(username);
         }
 
         String password = configData.getPassword();
-        if (password != null) {
+        if (!h2 && password != null) {
             this.dataSource.setPassword(password);
         }
     }
@@ -33,7 +39,13 @@ public final class PostgresConnectionHandler implements IPostgresConnectionHandl
     @Override
     public Optional<Connection> openConnection() {
         try {
-            Connection connection = dataSource.getConnection();
+            Connection connection = h2
+                    ? DriverManager.getConnection(
+                            configData.getJdbcUrl(),
+                            configData.getUsername(),
+                            configData.getPassword()
+                    )
+                    : dataSource.getConnection();
             try {
                 connection.setReadOnly(configData.isReadOnly());
                 return Optional.of(connection);
@@ -99,4 +111,3 @@ public final class PostgresConnectionHandler implements IPostgresConnectionHandl
     public void close() {
     }
 }
-
