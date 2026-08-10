@@ -17,6 +17,7 @@ public final class RedisDatabaseBuilder implements IRedisDatabaseBuilder {
     private String password;
     private boolean readOnly;
     private int databaseIndex;
+    private boolean tlsEnabled;
 
     private RedisDatabaseBuilder() {
     }
@@ -62,6 +63,12 @@ public final class RedisDatabaseBuilder implements IRedisDatabaseBuilder {
     }
 
     @Override
+    public RedisDatabaseBuilder tls(boolean enabled) {
+        this.tlsEnabled = enabled;
+        return this;
+    }
+
+    @Override
     public Optional<IRedisDatabase> build() {
         if (host == null || host.isBlank()) {
             RedisDatabaseException exception = new RedisDatabaseException(
@@ -92,7 +99,8 @@ public final class RedisDatabaseBuilder implements IRedisDatabaseBuilder {
                     username,
                     password,
                     readOnly,
-                    databaseIndex
+                    databaseIndex,
+                    tlsEnabled
             );
             IRedisConnectionHandler connections = new RedisConnectionHandler(configData);
             IRedisQueryHandler queries = new RedisQueryHandler(connections);
@@ -108,4 +116,3 @@ public final class RedisDatabaseBuilder implements IRedisDatabaseBuilder {
         }
     }
 }
-
