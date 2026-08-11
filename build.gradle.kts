@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.tavall"
-version = "1.0.0"
+version = providers.gradleProperty("tavallVersion").orElse("1.0.0").get()
 
 val h2 = libs.h2
 val hibernateOrm = libs.hibernate.orm
@@ -34,8 +34,30 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
         mavenCentral()
+        val githubToken = providers.environmentVariable("GITHUB_TOKEN").orNull
+        if (!githubToken.isNullOrBlank()) {
+            listOf(
+                "tavall-cloud",
+                "tavall-logging",
+                "tavall-concurrency",
+                "tavall-reflection",
+                "tavall-di",
+                "tavall-eventbus",
+                "tavall-cache",
+                "tavall-database",
+                "tavall-registry",
+                "tavall-scheduler",
+            ).forEach { repository ->
+                maven("https://maven.pkg.github.com/TavallStudios/$repository") {
+                    name = "github${repository.replace("-", "")}"
+                    credentials {
+                        username = providers.environmentVariable("GITHUB_ACTOR").orElse("github").get()
+                        password = githubToken
+                    }
+                }
+            }
+        }
     }
 
     dependencyLocking {
