@@ -159,6 +159,7 @@ project(":tavall-database-redis") {
         "api"(project(":tavall-database-core-contracts"))
         "api"(jedis)
         "testImplementation"(junitJupiter)
+        "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
         "testRuntimeOnly"(junitPlatformLauncher)
     }
 }
