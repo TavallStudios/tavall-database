@@ -2,10 +2,12 @@ package org.tavall.database.postgres;
 
 import jakarta.persistence.LockModeType;
 import org.junit.jupiter.api.Test;
+import org.tavall.database.postgres.entity.IPostgresEntityTransaction;
 import org.tavall.database.postgres.fixture.JpaProbeEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -123,6 +125,49 @@ final class PostgresJpaIntegrationTest {
                             .find(JpaProbeEntity.class, "audit")
                             .orElseThrow()
                             .getValue()
+            );
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
+    void rejectsEscapedEntityTransactionAfterOwnedScopeCompletes() {
+        IPostgresDatabase database = PostgresDatabaseBuilder.create()
+                .jdbcUrl("jdbc:h2:mem:tavall_entity_scope;DB_CLOSE_DELAY=-1")
+                .username("sa")
+                .password("")
+                .persistenceUnitName("tavall-entity-scope")
+                .generateSchema(true)
+                .build()
+                .orElseThrow();
+
+        try {
+            AtomicReference<IPostgresEntityTransaction> escaped =
+                    new AtomicReference<>();
+
+            database.entities().execute(transaction -> {
+                escaped.set(transaction);
+                transaction.save(new JpaProbeEntity("scope", "inside"));
+                return null;
+            });
+
+            assertEquals(
+                    "inside",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "scope")
+                            .orElseThrow()
+                            .getValue()
+            );
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> escaped.get().find(JpaProbeEntity.class, "scope")
+            );
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> escaped.get().save(
+                            new JpaProbeEntity("late", "outside")
+                    )
             );
         } finally {
             database.close();
