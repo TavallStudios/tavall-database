@@ -165,6 +165,14 @@ public final class PostgresEntityStore implements IPostgresEntityStore {
         });
     }
 
+    @Override
+    public <R> R execute(IPostgresEntityOperation<R> operation) {
+        Objects.requireNonNull(operation, "operation");
+        return jpaContext.write(entityManager -> operation.execute(
+                new PostgresEntityTransaction(entityManager)
+        ));
+    }
+
     private Map<String, ?> copyParameters(Map<String, ?> parameters) {
         if (parameters == null || parameters.isEmpty()) {
             return Map.of();
