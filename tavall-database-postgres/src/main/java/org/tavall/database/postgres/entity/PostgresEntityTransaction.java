@@ -15,6 +15,7 @@ import java.util.Optional;
 
 final class PostgresEntityTransaction implements IPostgresEntityTransaction {
     private final EntityManager entityManager;
+    private volatile boolean active = true;
 
     PostgresEntityTransaction(EntityManager entityManager) {
         this.entityManager = Objects.requireNonNull(
@@ -34,6 +35,7 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
             I id,
             LockModeType lockModeType
     ) {
+        ensureActive();
         Objects.requireNonNull(entityType, "entityType");
         Objects.requireNonNull(id, "id");
         LockModeType safeLockMode = lockModeType == null
@@ -51,12 +53,14 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
 
     @Override
     public <E> E save(E entity) {
+        ensureActive();
         Objects.requireNonNull(entity, "entity");
         return entityManager.merge(entity);
     }
 
     @Override
     public <E> List<E> saveAll(Collection<E> entities) {
+        ensureActive();
         Objects.requireNonNull(entities, "entities");
         ArrayList<E> saved = new ArrayList<>(entities.size());
         for (E entity : entities) {
@@ -72,6 +76,7 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
 
     @Override
     public <E> boolean delete(E entity) {
+        ensureActive();
         Objects.requireNonNull(entity, "entity");
         E managed = entityManager.contains(entity)
                 ? entity
@@ -82,6 +87,7 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
 
     @Override
     public <E, I> boolean deleteById(Class<E> entityType, I id) {
+        ensureActive();
         Objects.requireNonNull(entityType, "entityType");
         Objects.requireNonNull(id, "id");
         E entity = entityManager.find(
@@ -103,6 +109,7 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
             Map<String, ?> parameters,
             int maxResults
     ) {
+        ensureActive();
         Objects.requireNonNull(entityType, "entityType");
         String safeQueryName = requireText(queryName, "queryName");
         TypedQuery<E> query = entityManager.createNamedQuery(
@@ -122,15 +129,12 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
             String queryName,
             Map<String, ?> parameters
     ) {
-        List<E> results = findNamed(
+        return findNamed(
                 entityType,
                 queryName,
                 parameters,
                 1
-        );
-        return results.isEmpty()
-                ? Optional.empty()
-                : Optional.of(results.getFirst());
+        ).stream().findFirst();
     }
 
     @Override
@@ -138,10 +142,23 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
             String queryName,
             Map<String, ?> parameters
     ) {
+        ensureActive();
         String safeQueryName = requireText(queryName, "queryName");
         Query query = entityManager.createNamedQuery(safeQueryName);
         bind(query, copyParameters(parameters));
         return query.executeUpdate();
+    }
+
+    void invalidate() {
+        active = false;
+    }
+
+    private void ensureActive() {
+        if (!active) {
+            throw new IllegalStateException(
+                    "Entity transaction scope is no longer active"
+            );
+        }
     }
 
     private Map<String, ?> copyParameters(Map<String, ?> parameters) {
