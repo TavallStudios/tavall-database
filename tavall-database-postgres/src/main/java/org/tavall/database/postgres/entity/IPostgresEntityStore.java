@@ -52,4 +52,15 @@ public interface IPostgresEntityStore {
             String queryName,
             Map<String, ?> parameters
     );
+
+    /**
+     * Executes one typed entity operation inside a single transaction owned by
+     * Tavall Database.
+     *
+     * <p>Use this boundary when one application mutation must compose entity
+     * reads, locks, writes, and audit/idempotency records atomically. The
+     * application receives an entity-oriented transaction contract rather
+     * than EntityManager or transaction lifecycle access.</p>
+     */
+    <R> R execute(IPostgresEntityOperation<R> operation);
 }
