@@ -1,5 +1,6 @@
 package org.tavall.database.postgres;
 
+import jakarta.persistence.LockModeType;
 import org.junit.jupiter.api.Test;
 import org.tavall.database.postgres.fixture.JpaProbeEntity;
 
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class PostgresJpaIntegrationTest {
@@ -75,5 +77,95 @@ final class PostgresJpaIntegrationTest {
         }
 
         assertFalse(database.entities().isOpen());
+    }
+
+    @Test
+    void executesTypedEntityOperationInOneOwnedTransaction() {
+        IPostgresDatabase database = PostgresDatabaseBuilder.create()
+                .jdbcUrl("jdbc:h2:mem:tavall_entity_operation;DB_CLOSE_DELAY=-1")
+                .username("sa")
+                .password("")
+                .persistenceUnitName("tavall-entity-operation")
+                .generateSchema(true)
+                .build()
+                .orElseThrow();
+
+        try {
+            database.entities().save(
+                    new JpaProbeEntity("account", "before")
+            );
+
+            String result = database.entities().execute(transaction -> {
+                JpaProbeEntity locked = transaction.find(
+                        JpaProbeEntity.class,
+                        "account",
+                        LockModeType.PESSIMISTIC_WRITE
+                ).orElseThrow();
+                transaction.save(locked.withValue("after"));
+                transaction.save(new JpaProbeEntity("audit", "committed"));
+                return transaction.find(
+                        JpaProbeEntity.class,
+                        "account"
+                ).orElseThrow().getValue();
+            });
+
+            assertEquals("after", result);
+            assertEquals(
+                    "after",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "account")
+                            .orElseThrow()
+                            .getValue()
+            );
+            assertEquals(
+                    "committed",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "audit")
+                            .orElseThrow()
+                            .getValue()
+            );
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
+    void rollsBackTypedEntityOperationWhenApplicationOperationFails() {
+        IPostgresDatabase database = PostgresDatabaseBuilder.create()
+                .jdbcUrl("jdbc:h2:mem:tavall_entity_rollback;DB_CLOSE_DELAY=-1")
+                .username("sa")
+                .password("")
+                .persistenceUnitName("tavall-entity-rollback")
+                .generateSchema(true)
+                .build()
+                .orElseThrow();
+
+        try {
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> database.entities().execute(transaction -> {
+                        transaction.save(new JpaProbeEntity(
+                                "rolled-back-account",
+                                "changed"
+                        ));
+                        transaction.save(new JpaProbeEntity(
+                                "rolled-back-audit",
+                                "changed"
+                        ));
+                        throw new IllegalStateException("fail operation");
+                    })
+            );
+
+            assertFalse(database.entities().find(
+                    JpaProbeEntity.class,
+                    "rolled-back-account"
+            ).isPresent());
+            assertFalse(database.entities().find(
+                    JpaProbeEntity.class,
+                    "rolled-back-audit"
+            ).isPresent());
+        } finally {
+            database.close();
+        }
     }
 }
