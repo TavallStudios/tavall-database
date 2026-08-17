@@ -13,6 +13,11 @@ import java.util.Optional;
  * <p>This contract intentionally exposes no EntityManager, connection, or
  * transaction lifecycle. Application code may compose typed entity behavior
  * while Tavall Database remains the sole transaction owner.</p>
+ *
+ * <p>The context is scoped to the thread executing
+ * {@link IPostgresEntityStore#executeAtomic(IPostgresEntityAtomicOperation)}.
+ * Callers must not retain it after the atomic operation returns or hand it to
+ * another thread.</p>
  */
 public interface IPostgresEntityOperationContext {
 
