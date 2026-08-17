@@ -149,7 +149,7 @@ final class PostgresJpaIntegrationTest {
             AtomicReference<Throwable> workerFailure = new AtomicReference<>();
 
             database.entities().execute(transaction -> {
-                Thread worker = new Thread(() -> {
+                Thread worker = Thread.ofVirtual().start(() -> {
                     try {
                         transaction.find(
                                 JpaProbeEntity.class,
@@ -158,11 +158,10 @@ final class PostgresJpaIntegrationTest {
                     } catch (Throwable throwable) {
                         workerFailure.set(throwable);
                     }
-                }, "tavall-database-cross-thread-probe");
+                });
 
-                worker.start();
                 try {
-                    worker.join();
+                    worker.join(5_000L);
                 } catch (InterruptedException exception) {
                     Thread.currentThread().interrupt();
                     throw new IllegalStateException(
@@ -170,6 +169,7 @@ final class PostgresJpaIntegrationTest {
                             exception
                     );
                 }
+                assertFalse(worker.isAlive());
                 return null;
             });
 
