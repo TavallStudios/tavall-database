@@ -18,12 +18,15 @@ final class PostgresEntityOperationContext
         implements IPostgresEntityOperationContext {
 
     private final EntityManager entityManager;
+    private final Thread ownerThread;
+    private volatile boolean active = true;
 
     PostgresEntityOperationContext(EntityManager entityManager) {
         this.entityManager = Objects.requireNonNull(
                 entityManager,
                 "entityManager"
         );
+        this.ownerThread = Thread.currentThread();
     }
 
     @Override
@@ -40,6 +43,7 @@ final class PostgresEntityOperationContext
             IdType id,
             LockModeType lockModeType
     ) {
+        ensureUsable();
         Objects.requireNonNull(entityType, "entityType");
         Objects.requireNonNull(id, "id");
         LockModeType safeLockMode = lockModeType == null
@@ -53,6 +57,7 @@ final class PostgresEntityOperationContext
 
     @Override
     public <EntityType> EntityType save(EntityType entity) {
+        ensureUsable();
         Objects.requireNonNull(entity, "entity");
         return entityManager.merge(entity);
     }
@@ -61,6 +66,7 @@ final class PostgresEntityOperationContext
     public <EntityType> List<EntityType> saveAll(
             Collection<EntityType> entities
     ) {
+        ensureUsable();
         Objects.requireNonNull(entities, "entities");
         ArrayList<EntityType> saved = new ArrayList<>(entities.size());
         for (EntityType entity : entities) {
@@ -76,6 +82,7 @@ final class PostgresEntityOperationContext
 
     @Override
     public <EntityType> boolean delete(EntityType entity) {
+        ensureUsable();
         Objects.requireNonNull(entity, "entity");
         EntityType managed = entityManager.contains(entity)
                 ? entity
@@ -89,6 +96,7 @@ final class PostgresEntityOperationContext
             Class<EntityType> entityType,
             IdType id
     ) {
+        ensureUsable();
         Objects.requireNonNull(entityType, "entityType");
         Objects.requireNonNull(id, "id");
         EntityType entity = entityManager.find(
@@ -110,6 +118,7 @@ final class PostgresEntityOperationContext
             Map<String, ?> parameters,
             int maxResults
     ) {
+        ensureUsable();
         Objects.requireNonNull(entityType, "entityType");
         String safeQueryName = requireText(queryName, "queryName");
         Map<String, ?> safeParameters = copyParameters(parameters);
@@ -133,15 +142,12 @@ final class PostgresEntityOperationContext
             String queryName,
             Map<String, ?> parameters
     ) {
-        List<EntityType> results = findNamed(
+        return findNamed(
                 entityType,
                 queryName,
                 parameters,
                 1
-        );
-        return results.isEmpty()
-                ? Optional.empty()
-                : Optional.of(results.getFirst());
+        ).stream().findFirst();
     }
 
     @Override
@@ -149,6 +155,7 @@ final class PostgresEntityOperationContext
             String queryName,
             Map<String, ?> parameters
     ) {
+        ensureUsable();
         String safeQueryName = requireText(queryName, "queryName");
         Map<String, ?> safeParameters = copyParameters(parameters);
         entityManager.flush();
@@ -157,6 +164,23 @@ final class PostgresEntityOperationContext
         int affectedRows = query.executeUpdate();
         entityManager.clear();
         return affectedRows;
+    }
+
+    void invalidate() {
+        active = false;
+    }
+
+    private void ensureUsable() {
+        if (!active) {
+            throw new IllegalStateException(
+                    "Entity operation context is no longer active"
+            );
+        }
+        if (Thread.currentThread() != ownerThread) {
+            throw new IllegalStateException(
+                    "Entity operation context is bound to its owning thread"
+            );
+        }
     }
 
     private Map<String, ?> copyParameters(Map<String, ?> parameters) {
