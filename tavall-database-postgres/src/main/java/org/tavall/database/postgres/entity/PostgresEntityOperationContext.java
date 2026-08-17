@@ -1,0 +1,221 @@
+package org.tavall.database.postgres.entity;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+final class PostgresEntityOperationContext
+        implements IPostgresEntityOperationContext {
+
+    private final EntityManager entityManager;
+    private final Thread ownerThread;
+    private volatile boolean active = true;
+
+    PostgresEntityOperationContext(EntityManager entityManager) {
+        this.entityManager = Objects.requireNonNull(
+                entityManager,
+                "entityManager"
+        );
+        this.ownerThread = Thread.currentThread();
+    }
+
+    @Override
+    public <EntityType, IdType> Optional<EntityType> find(
+            Class<EntityType> entityType,
+            IdType id
+    ) {
+        return find(entityType, id, LockModeType.NONE);
+    }
+
+    @Override
+    public <EntityType, IdType> Optional<EntityType> find(
+            Class<EntityType> entityType,
+            IdType id,
+            LockModeType lockModeType
+    ) {
+        ensureUsable();
+        Objects.requireNonNull(entityType, "entityType");
+        Objects.requireNonNull(id, "id");
+        LockModeType safeLockMode = lockModeType == null
+                ? LockModeType.NONE
+                : lockModeType;
+        EntityType entity = safeLockMode == LockModeType.NONE
+                ? entityManager.find(entityType, id)
+                : entityManager.find(entityType, id, safeLockMode);
+        return Optional.ofNullable(entity);
+    }
+
+    @Override
+    public <EntityType> EntityType save(EntityType entity) {
+        ensureUsable();
+        Objects.requireNonNull(entity, "entity");
+        return entityManager.merge(entity);
+    }
+
+    @Override
+    public <EntityType> List<EntityType> saveAll(
+            Collection<EntityType> entities
+    ) {
+        ensureUsable();
+        Objects.requireNonNull(entities, "entities");
+
+        // Validate the entire batch before the first persistence mutation.
+        // Atomic callbacks are allowed to handle validation failures; lazily
+        // discovering a null after earlier merges would otherwise let those
+        // earlier writes commit when the callback catches the exception.
+        for (EntityType entity : entities) {
+            if (entity == null) {
+                throw new IllegalArgumentException(
+                        "entities must not contain null"
+                );
+            }
+        }
+
+        ArrayList<EntityType> saved = new ArrayList<>(entities.size());
+        for (EntityType entity : entities) {
+            saved.add(entityManager.merge(entity));
+        }
+        return List.copyOf(saved);
+    }
+
+    @Override
+    public <EntityType> boolean delete(EntityType entity) {
+        ensureUsable();
+        Objects.requireNonNull(entity, "entity");
+        EntityType managed = entityManager.contains(entity)
+                ? entity
+                : entityManager.merge(entity);
+        entityManager.remove(managed);
+        return true;
+    }
+
+    @Override
+    public <EntityType, IdType> boolean deleteById(
+            Class<EntityType> entityType,
+            IdType id
+    ) {
+        ensureUsable();
+        Objects.requireNonNull(entityType, "entityType");
+        Objects.requireNonNull(id, "id");
+        EntityType entity = entityManager.find(
+                entityType,
+                id,
+                LockModeType.PESSIMISTIC_WRITE
+        );
+        if (entity == null) {
+            return false;
+        }
+        entityManager.remove(entity);
+        return true;
+    }
+
+    @Override
+    public <EntityType> List<EntityType> findNamed(
+            Class<EntityType> entityType,
+            String queryName,
+            Map<String, ?> parameters,
+            int maxResults
+    ) {
+        ensureUsable();
+        Objects.requireNonNull(entityType, "entityType");
+        String safeQueryName = requireText(queryName, "queryName");
+        Map<String, ?> safeParameters = copyParameters(parameters);
+        int safeMaxResults = maxResults <= 0
+                ? Integer.MAX_VALUE
+                : maxResults;
+        TypedQuery<EntityType> query = entityManager.createNamedQuery(
+                safeQueryName,
+                entityType
+        );
+        bind(query, safeParameters);
+        if (safeMaxResults != Integer.MAX_VALUE) {
+            query.setMaxResults(safeMaxResults);
+        }
+        return List.copyOf(query.getResultList());
+    }
+
+    @Override
+    public <EntityType> Optional<EntityType> findOneNamed(
+            Class<EntityType> entityType,
+            String queryName,
+            Map<String, ?> parameters
+    ) {
+        return findNamed(
+                entityType,
+                queryName,
+                parameters,
+                1
+        ).stream().findFirst();
+    }
+
+    @Override
+    public int executeNamedMutation(
+            String queryName,
+            Map<String, ?> parameters
+    ) {
+        ensureUsable();
+        String safeQueryName = requireText(queryName, "queryName");
+        Map<String, ?> safeParameters = copyParameters(parameters);
+        try {
+            entityManager.flush();
+            Query query = entityManager.createNamedQuery(safeQueryName);
+            bind(query, safeParameters);
+            return query.executeUpdate();
+        } finally {
+            // A bulk mutation bypasses managed entity state. Clear even when
+            // flush/query execution fails so a caller that handles the failure
+            // cannot continue the atomic callback with stale managed entities.
+            entityManager.clear();
+        }
+    }
+
+    void invalidate() {
+        active = false;
+    }
+
+    private void ensureUsable() {
+        if (!active) {
+            throw new IllegalStateException(
+                    "Entity operation context is no longer active"
+            );
+        }
+        if (Thread.currentThread() != ownerThread) {
+            throw new IllegalStateException(
+                    "Entity operation context is bound to its owning thread"
+            );
+        }
+    }
+
+    private Map<String, ?> copyParameters(Map<String, ?> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return Map.of();
+        }
+        LinkedHashMap<String, Object> copied = new LinkedHashMap<>();
+        parameters.forEach((name, value) -> copied.put(
+                requireText(name, "parameter name"),
+                value
+        ));
+        return Collections.unmodifiableMap(copied);
+    }
+
+    private void bind(Query query, Map<String, ?> parameters) {
+        parameters.forEach(query::setParameter);
+    }
+
+    private String requireText(String value, String name) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(name + " is required");
+        }
+        return value.trim();
+    }
+}
