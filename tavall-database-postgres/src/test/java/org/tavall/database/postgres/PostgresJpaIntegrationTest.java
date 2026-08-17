@@ -2,10 +2,12 @@ package org.tavall.database.postgres;
 
 import jakarta.persistence.LockModeType;
 import org.junit.jupiter.api.Test;
+import org.tavall.database.postgres.entity.IPostgresEntityOperationContext;
 import org.tavall.database.postgres.fixture.JpaProbeEntity;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -156,6 +158,80 @@ final class PostgresJpaIntegrationTest {
                             .find(JpaProbeEntity.class, "bulk")
                             .orElseThrow()
                             .getValue()
+            );
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
+    void rejectsAtomicContextUseFromDifferentThread() {
+        IPostgresDatabase database = database("tavall_jpa_atomic_thread_scope");
+
+        try {
+            database.entities().save(
+                    new JpaProbeEntity("thread-scope", "inside")
+            );
+            AtomicReference<Throwable> workerFailure = new AtomicReference<>();
+
+            database.entities().executeAtomic(entities -> {
+                Thread worker = Thread.ofVirtual().start(() -> {
+                    try {
+                        entities.find(JpaProbeEntity.class, "thread-scope");
+                    } catch (Throwable throwable) {
+                        workerFailure.set(throwable);
+                    }
+                });
+
+                try {
+                    worker.join(5_000L);
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(
+                            "Interrupted while verifying atomic context thread scope",
+                            exception
+                    );
+                }
+                assertFalse(worker.isAlive());
+                return null;
+            });
+
+            assertTrue(workerFailure.get() instanceof IllegalStateException);
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
+    void rejectsEscapedAtomicContextAfterOwnedScopeCompletes() {
+        IPostgresDatabase database = database("tavall_jpa_atomic_scope");
+
+        try {
+            AtomicReference<IPostgresEntityOperationContext> escaped =
+                    new AtomicReference<>();
+
+            database.entities().executeAtomic(entities -> {
+                escaped.set(entities);
+                entities.save(new JpaProbeEntity("scope", "inside"));
+                return null;
+            });
+
+            assertEquals(
+                    "inside",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "scope")
+                            .orElseThrow()
+                            .getValue()
+            );
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> escaped.get().find(JpaProbeEntity.class, "scope")
+            );
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> escaped.get().save(
+                            new JpaProbeEntity("late", "outside")
+                    )
             );
         } finally {
             database.close();
