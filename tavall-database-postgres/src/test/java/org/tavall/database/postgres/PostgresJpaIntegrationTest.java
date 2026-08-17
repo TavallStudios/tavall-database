@@ -132,6 +132,54 @@ final class PostgresJpaIntegrationTest {
     }
 
     @Test
+    void rejectsEntityTransactionUseFromDifferentThread() {
+        IPostgresDatabase database = PostgresDatabaseBuilder.create()
+                .jdbcUrl("jdbc:h2:mem:tavall_entity_thread_scope;DB_CLOSE_DELAY=-1")
+                .username("sa")
+                .password("")
+                .persistenceUnitName("tavall-entity-thread-scope")
+                .generateSchema(true)
+                .build()
+                .orElseThrow();
+
+        try {
+            database.entities().save(
+                    new JpaProbeEntity("thread-scope", "inside")
+            );
+            AtomicReference<Throwable> workerFailure = new AtomicReference<>();
+
+            database.entities().execute(transaction -> {
+                Thread worker = new Thread(() -> {
+                    try {
+                        transaction.find(
+                                JpaProbeEntity.class,
+                                "thread-scope"
+                        );
+                    } catch (Throwable throwable) {
+                        workerFailure.set(throwable);
+                    }
+                }, "tavall-database-cross-thread-probe");
+
+                worker.start();
+                try {
+                    worker.join();
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(
+                            "Interrupted while verifying transaction thread scope",
+                            exception
+                    );
+                }
+                return null;
+            });
+
+            assertTrue(workerFailure.get() instanceof IllegalStateException);
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
     void rejectsEscapedEntityTransactionAfterOwnedScopeCompletes() {
         IPostgresDatabase database = PostgresDatabaseBuilder.create()
                 .jdbcUrl("jdbc:h2:mem:tavall_entity_scope;DB_CLOSE_DELAY=-1")
