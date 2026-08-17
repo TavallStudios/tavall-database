@@ -68,13 +68,21 @@ final class PostgresEntityOperationContext
     ) {
         ensureUsable();
         Objects.requireNonNull(entities, "entities");
-        ArrayList<EntityType> saved = new ArrayList<>(entities.size());
+
+        // Validate the entire batch before the first persistence mutation.
+        // Atomic callbacks are allowed to handle validation failures; lazily
+        // discovering a null after earlier merges would otherwise let those
+        // earlier writes commit when the callback catches the exception.
         for (EntityType entity : entities) {
             if (entity == null) {
                 throw new IllegalArgumentException(
                         "entities must not contain null"
                 );
             }
+        }
+
+        ArrayList<EntityType> saved = new ArrayList<>(entities.size());
+        for (EntityType entity : entities) {
             saved.add(entityManager.merge(entity));
         }
         return List.copyOf(saved);
