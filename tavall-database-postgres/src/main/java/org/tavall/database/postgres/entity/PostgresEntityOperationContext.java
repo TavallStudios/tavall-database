@@ -158,12 +158,17 @@ final class PostgresEntityOperationContext
         ensureUsable();
         String safeQueryName = requireText(queryName, "queryName");
         Map<String, ?> safeParameters = copyParameters(parameters);
-        entityManager.flush();
-        Query query = entityManager.createNamedQuery(safeQueryName);
-        bind(query, safeParameters);
-        int affectedRows = query.executeUpdate();
-        entityManager.clear();
-        return affectedRows;
+        try {
+            entityManager.flush();
+            Query query = entityManager.createNamedQuery(safeQueryName);
+            bind(query, safeParameters);
+            return query.executeUpdate();
+        } finally {
+            // A bulk mutation bypasses managed entity state. Clear even when
+            // flush/query execution fails so a caller that handles the failure
+            // cannot continue the atomic callback with stale managed entities.
+            entityManager.clear();
+        }
     }
 
     void invalidate() {
