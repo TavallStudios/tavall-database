@@ -120,6 +120,49 @@ final class PostgresJpaIntegrationTest {
     }
 
     @Test
+    void clearsManagedStateAfterAtomicNamedMutation() {
+        IPostgresDatabase database = database("tavall_jpa_atomic_bulk_mutation");
+
+        try {
+            database.entities().save(
+                    new JpaProbeEntity("bulk", "before")
+            );
+
+            String reloadedValue = database.entities().executeAtomic(entities -> {
+                JpaProbeEntity staleManaged = entities.find(
+                        JpaProbeEntity.class,
+                        "bulk"
+                ).orElseThrow();
+                assertEquals("before", staleManaged.getValue());
+
+                assertEquals(
+                        1,
+                        entities.executeNamedMutation(
+                                JpaProbeEntity.UPDATE_VALUE_BY_ID,
+                                Map.of("id", "bulk", "value", "bulk-updated")
+                        )
+                );
+
+                return entities.find(
+                        JpaProbeEntity.class,
+                        "bulk"
+                ).orElseThrow().getValue();
+            });
+
+            assertEquals("bulk-updated", reloadedValue);
+            assertEquals(
+                    "bulk-updated",
+                    database.entities()
+                            .find(JpaProbeEntity.class, "bulk")
+                            .orElseThrow()
+                            .getValue()
+            );
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
     void rollsBackCompleteAtomicEntityOperationAfterFailure() {
         IPostgresDatabase database = database("tavall_jpa_atomic_rollback");
 
