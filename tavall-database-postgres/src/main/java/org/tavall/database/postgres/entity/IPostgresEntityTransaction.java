@@ -14,6 +14,11 @@ import java.util.Optional;
  * <p>This contract intentionally mirrors the entity store operations that are
  * safe to compose atomically without exposing EntityManager or transaction
  * lifecycle control to application modules.</p>
+ *
+ * <p>The transaction is scoped to the thread that invokes the owning
+ * {@link IPostgresEntityStore#execute(IPostgresEntityOperation)} operation.
+ * Callers must not retain it after the operation returns or hand it to another
+ * thread.</p>
  */
 public interface IPostgresEntityTransaction {
 
