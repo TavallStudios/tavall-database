@@ -102,12 +102,18 @@ public final class PostgresEntityStore implements IPostgresEntityStore {
             IPostgresEntityAtomicOperation<ResultType> operation
     ) {
         Objects.requireNonNull(operation, "operation");
-        return jpaContext.write(entityManager -> operation.execute(
-                operationContext(entityManager)
-        ));
+        return jpaContext.write(entityManager -> {
+            PostgresEntityOperationContext entities =
+                    operationContext(entityManager);
+            try {
+                return operation.execute(entities);
+            } finally {
+                entities.invalidate();
+            }
+        });
     }
 
-    private IPostgresEntityOperationContext operationContext(
+    private PostgresEntityOperationContext operationContext(
             jakarta.persistence.EntityManager entityManager
     ) {
         return new PostgresEntityOperationContext(entityManager);
