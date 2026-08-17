@@ -15,6 +15,7 @@ import java.util.Optional;
 
 final class PostgresEntityTransaction implements IPostgresEntityTransaction {
     private final EntityManager entityManager;
+    private final Thread ownerThread;
     private volatile boolean active = true;
 
     PostgresEntityTransaction(EntityManager entityManager) {
@@ -22,6 +23,7 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
                 entityManager,
                 "entityManager"
         );
+        this.ownerThread = Thread.currentThread();
     }
 
     @Override
@@ -157,6 +159,11 @@ final class PostgresEntityTransaction implements IPostgresEntityTransaction {
         if (!active) {
             throw new IllegalStateException(
                     "Entity transaction scope is no longer active"
+            );
+        }
+        if (Thread.currentThread() != ownerThread) {
+            throw new IllegalStateException(
+                    "Entity transaction scope is bound to its owning thread"
             );
         }
     }
