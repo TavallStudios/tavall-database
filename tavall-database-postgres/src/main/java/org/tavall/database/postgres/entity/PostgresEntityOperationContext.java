@@ -151,9 +151,12 @@ final class PostgresEntityOperationContext
     ) {
         String safeQueryName = requireText(queryName, "queryName");
         Map<String, ?> safeParameters = copyParameters(parameters);
+        entityManager.flush();
         Query query = entityManager.createNamedQuery(safeQueryName);
         bind(query, safeParameters);
-        return query.executeUpdate();
+        int affectedRows = query.executeUpdate();
+        entityManager.clear();
+        return affectedRows;
     }
 
     private Map<String, ?> copyParameters(Map<String, ?> parameters) {
