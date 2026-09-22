@@ -52,4 +52,15 @@ public interface IPostgresEntityStore {
             String queryName,
             Map<String, ?> parameters
     );
+
+    /**
+     * Executes a composed entity operation inside one Tavall Database-owned
+     * write transaction.
+     *
+     * <p>The supplied operation receives typed entity capabilities only. It
+     * cannot access or control the underlying EntityManager or transaction.</p>
+     */
+    <ResultType> ResultType executeAtomic(
+            IPostgresEntityAtomicOperation<ResultType> operation
+    );
 }
