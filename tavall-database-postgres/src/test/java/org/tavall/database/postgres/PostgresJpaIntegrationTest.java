@@ -293,6 +293,7 @@ final class PostgresJpaIntegrationTest {
                 .username("sa")
                 .password("")
                 .persistenceUnitName(name)
+                .entityPackage("org.tavall.database.postgres.fixture")
                 .generateSchema(true)
                 .build()
                 .orElseThrow();

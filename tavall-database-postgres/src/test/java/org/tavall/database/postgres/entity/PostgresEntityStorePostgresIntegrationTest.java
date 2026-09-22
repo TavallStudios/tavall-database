@@ -208,6 +208,7 @@ final class PostgresEntityStorePostgresIntegrationTest {
                         "postgres"
                 ))
                 .persistenceUnitName(persistenceUnitName)
+                .entityPackage("org.tavall.database.postgres.fixture")
                 .generateSchema(true)
                 .build()
                 .orElseThrow();
