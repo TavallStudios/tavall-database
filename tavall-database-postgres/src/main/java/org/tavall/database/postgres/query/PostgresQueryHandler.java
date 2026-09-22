@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,39 @@ public final class PostgresQueryHandler implements IPostgresQueryHandler {
 
     public PostgresQueryHandler(IPostgresConnectionHandler connectionHandler) {
         this.connectionHandler = connectionHandler;
+    }
+
+    @Override
+    public boolean executeStatement(String sql) {
+        if (sql == null || sql.isBlank()) {
+            PostgresQueryException exception = new PostgresQueryException(
+                    "Unable to execute PostgreSQL statement because sql is null or blank."
+            );
+            Log.exception(exception);
+            return false;
+        }
+
+        Log.info("Executing PostgreSQL statement: " + normalizeSql(sql));
+
+        Optional<Connection> connectionOptional = connectionHandler.openConnection();
+        if (connectionOptional.isEmpty()) {
+            return false;
+        }
+
+        Connection connection = connectionOptional.get();
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+            return true;
+        } catch (SQLException exception) {
+            PostgresQueryException postgresQueryException = new PostgresQueryException(
+                    "Unable to execute PostgreSQL statement.",
+                    exception
+            );
+            Log.exception(postgresQueryException);
+            return false;
+        } finally {
+            connectionHandler.closeConnection(connection);
+        }
     }
 
     @Override
@@ -167,4 +201,3 @@ public final class PostgresQueryHandler implements IPostgresQueryHandler {
         return sql.replaceAll("\\s+", " ").trim();
     }
 }
-
