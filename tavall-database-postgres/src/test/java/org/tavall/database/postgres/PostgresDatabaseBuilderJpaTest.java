@@ -2,6 +2,9 @@ package org.tavall.database.postgres;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,6 +23,10 @@ final class PostgresDatabaseBuilderJpaTest {
                 .orElseThrow();
 
         try {
+            assertEquals(
+                    List.of("org.tavall.database.postgres.fixture"),
+                    database.getConfigData().getEntityPackages()
+            );
             assertNotNull(database.jpa());
             assertTrue(database.jpa().isOpen());
             assertFalse(database.jpa().isInitialized());

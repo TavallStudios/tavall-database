@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
-    private static final String DEFAULT_ENTITY_PACKAGE = "org.tavall";
-
     private String jdbcUrl;
     private String username;
     private String password;
@@ -27,7 +25,6 @@ public final class PostgresDatabaseBuilder implements IPostgresDatabaseBuilder {
 
     private PostgresDatabaseBuilder() {
         this.entityPackages = new ArrayList<>();
-        this.entityPackages.add(DEFAULT_ENTITY_PACKAGE);
     }
 
     public static PostgresDatabaseBuilder create() {
