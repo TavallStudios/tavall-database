@@ -64,7 +64,6 @@ final class PostgresJpaBootstrap {
         );
         settings.put("hibernate.show_sql", configData.shouldShowSql());
         settings.put("hibernate.format_sql", configData.shouldShowSql());
-        settings.put("hibernate.session_factory_name", persistenceUnitName(configData));
         settings.put("hibernate.current_session_context_class", "thread");
         return settings;
     }
