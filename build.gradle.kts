@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.Copy
 import java.util.zip.ZipFile
 
 plugins {
@@ -176,5 +177,17 @@ project(":tavall-database-test-suite") {
         "testImplementation"(junitJupiter)
         "testRuntimeOnly"(junitPlatformLauncher)
         "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
+    }
+}
+
+
+subprojects {
+    val artifactFileName = "$name.jar"
+    tasks.register<Copy>("tavallCiArtifact") {
+        val binaryJar = tasks.named<Jar>("jar")
+        dependsOn(binaryJar)
+        from(binaryJar.flatMap { it.archiveFile })
+        into(rootProject.layout.buildDirectory.dir("tavall-ci-artifacts"))
+        rename { artifactFileName }
     }
 }

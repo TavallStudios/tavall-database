@@ -18,8 +18,23 @@ dependencies:
     role: SHARED_DEP
     selector: required-source
 
+artifacts:
+  - name: tavall-database-core-contracts
+    path: build/tavall-ci-artifacts/tavall-database-core-contracts.jar
+  - name: tavall-database-postgres
+    path: build/tavall-ci-artifacts/tavall-database-postgres.jar
+  - name: tavall-database-mongo
+    path: build/tavall-ci-artifacts/tavall-database-mongo.jar
+  - name: tavall-database-redis
+    path: build/tavall-ci-artifacts/tavall-database-redis.jar
+  - name: tavall-database-qdrant
+    path: build/tavall-ci-artifacts/tavall-database-qdrant.jar
+  - name: tavall-database-core
+    path: build/tavall-ci-artifacts/tavall-database-core.jar
+
 requiredChecks:
   - quality
+  - artifact
 
 checks:
   quality:
@@ -49,3 +64,13 @@ checks:
       - ":tavall-database-qdrant:assemble"
       - ":tavall-database-core:assemble"
       - ":tavall-database-test-suite:assemble"
+
+  artifact:
+    executor: gradle
+    tasks:
+      - :tavall-database-core-contracts:tavallCiArtifact
+      - :tavall-database-postgres:tavallCiArtifact
+      - :tavall-database-mongo:tavallCiArtifact
+      - :tavall-database-redis:tavallCiArtifact
+      - :tavall-database-qdrant:tavallCiArtifact
+      - :tavall-database-core:tavallCiArtifact
