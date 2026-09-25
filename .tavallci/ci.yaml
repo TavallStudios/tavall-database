@@ -1,0 +1,76 @@
+version: 2
+
+source:
+  repository: TavallStudios/tavall-database
+  provider: github
+
+build:
+  type: gradle
+  java: 25
+  gradle: 9.6.1
+
+resources:
+  mode: SYSTEM
+
+dependencies:
+  - kind: source
+    identity: TavallStudios/tavall-logging
+    role: SHARED_DEP
+    selector: required-source
+
+artifacts:
+  - name: tavall-database-core-contracts
+    path: build/tavall-ci-artifacts/tavall-database-core-contracts.jar
+  - name: tavall-database-postgres
+    path: build/tavall-ci-artifacts/tavall-database-postgres.jar
+  - name: tavall-database-mongo
+    path: build/tavall-ci-artifacts/tavall-database-mongo.jar
+  - name: tavall-database-redis
+    path: build/tavall-ci-artifacts/tavall-database-redis.jar
+  - name: tavall-database-qdrant
+    path: build/tavall-ci-artifacts/tavall-database-qdrant.jar
+  - name: tavall-database-core
+    path: build/tavall-ci-artifacts/tavall-database-core.jar
+
+requiredChecks:
+  - quality
+  - artifact
+
+checks:
+  quality:
+    executor: gradle
+    tasks:
+      - "clean"
+      - ":tavall-database-core-contracts:clean"
+      - ":tavall-database-postgres:clean"
+      - ":tavall-database-mongo:clean"
+      - ":tavall-database-redis:clean"
+      - ":tavall-database-qdrant:clean"
+      - ":tavall-database-core:clean"
+      - ":tavall-database-test-suite:clean"
+      - "check"
+      - ":tavall-database-core-contracts:check"
+      - ":tavall-database-postgres:check"
+      - ":tavall-database-mongo:check"
+      - ":tavall-database-redis:check"
+      - ":tavall-database-qdrant:check"
+      - ":tavall-database-core:check"
+      - ":tavall-database-test-suite:check"
+      - "assemble"
+      - ":tavall-database-core-contracts:assemble"
+      - ":tavall-database-postgres:assemble"
+      - ":tavall-database-mongo:assemble"
+      - ":tavall-database-redis:assemble"
+      - ":tavall-database-qdrant:assemble"
+      - ":tavall-database-core:assemble"
+      - ":tavall-database-test-suite:assemble"
+
+  artifact:
+    executor: gradle
+    tasks:
+      - :tavall-database-core-contracts:tavallCiArtifact
+      - :tavall-database-postgres:tavallCiArtifact
+      - :tavall-database-mongo:tavallCiArtifact
+      - :tavall-database-redis:tavallCiArtifact
+      - :tavall-database-qdrant:tavallCiArtifact
+      - :tavall-database-core:tavallCiArtifact
