@@ -50,7 +50,7 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 
 - **Module Type:** `LIBRARY`
 - **Runtime:** `None`
-- **Current PR Stack:** [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: __PR_LINK__.
+- **Current PR Stack:** [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26).
 - Repository-specific development guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 
@@ -61,13 +61,13 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/tavall-database-core/README.md` | 2026-09-27 12:51 PM PDT | __PR_URL__ |
-| Notion | `NOT_APPLICABLE` | — | 2026-09-27 12:51 PM PDT | README routing surface; no 1:1 twin is assigned. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/tavall-database-core/README.md` | 2026-09-27 12:59 PM PDT | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) |
+| Notion | `NOT_APPLICABLE` | — | 2026-09-27 12:59 PM PDT | README routing surface; no 1:1 twin is assigned. |
 
 ### Update History
 
 | Timestamp | Surface | Event | Location | Previous Location | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-09-27 12:51 PM PDT | GitHub | `CREATED` | `TavallStudios/tavall-database/tavall-database-core/README.md` | — | __PR_URL__ | Added a contextual module README with source-backed ownership and routing. |
+| 2026-09-27 12:59 PM PDT | GitHub | `CREATED` | `TavallStudios/tavall-database/tavall-database-core/README.md` | — | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) | Added a contextual module README with source-backed ownership and routing. |
 
 </details>

@@ -68,13 +68,13 @@ No license file is currently tracked in this repository. Contact the maintainers
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/README.md` | 2026-09-27 12:51 PM PDT | __PR_URL__ |
-| Notion | `NOT_APPLICABLE` | — | 2026-09-27 12:51 PM PDT | README routing surface; no 1:1 twin is assigned. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/README.md` | 2026-09-27 12:59 PM PDT | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) |
+| Notion | `NOT_APPLICABLE` | — | 2026-09-27 12:59 PM PDT | README routing surface; no 1:1 twin is assigned. |
 
 ### Update History
 
 | Timestamp | Surface | Event | Location | Previous Location | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-09-27 12:51 PM PDT | GitHub | `UPDATED` | `TavallStudios/tavall-database/README.md` | `TavallStudios/tavall-database/README.md` | __PR_URL__ | Reworked the public root README to route contributors and map the current modules. |
+| 2026-09-27 12:59 PM PDT | GitHub | `UPDATED` | `TavallStudios/tavall-database/README.md` | `TavallStudios/tavall-database/README.md` | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) | Reworked the public root README to route contributors and map the current modules. |
 
 </details>
