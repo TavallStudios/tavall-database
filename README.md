@@ -42,7 +42,7 @@ The contracts module defines common interfaces. Provider modules implement them 
 - [Contribution guide](CONTRIBUTING.md) — repository-specific development and validation.
 - [Workflow compatibility pointer](docs/quality/GIT_WORKFLOW.md) — redirects to shared policy.
 - [Tavall Docs Git Workflow](https://github.com/TavallStudios/tavall-docs/blob/main/docs/quality/GIT_WORKFLOW.md) — shared contribution and review guidance.
-
+- [Tavall Database System Progression](docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md) — cross-module architecture, validation, and system history.
 
 ## Requirements / Compatibility
 
@@ -68,7 +68,7 @@ No license file is currently tracked in this repository. Contact the maintainers
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/README.md` | 2026-09-27 12:59 PM PDT | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/README.md` | 2026-09-27 5:59 PM PDT | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) |
 | Notion | `NOT_APPLICABLE` | — | 2026-09-27 12:59 PM PDT | README routing surface; no 1:1 twin is assigned. |
 
 ### Update History
@@ -76,5 +76,6 @@ No license file is currently tracked in this repository. Contact the maintainers
 | Timestamp | Surface | Event | Location | Previous Location | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-09-27 12:59 PM PDT | GitHub | `UPDATED` | `TavallStudios/tavall-database/README.md` | `TavallStudios/tavall-database/README.md` | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) | Reworked the public root README to route contributors and map the current modules. |
+| 2026-09-27 5:59 PM PDT | GitHub | `UPDATED` | `TavallStudios/tavall-database/README.md` | `TavallStudios/tavall-database/README.md` | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) | Added the system Progression route. |
 
 </details>
