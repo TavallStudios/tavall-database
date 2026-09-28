@@ -37,6 +37,8 @@ tavall-database/
 | --- | --- | --- | --- |
 | GENERAL | [Repository README](../README.md) | Public overview and module map. | GitHub |
 | Technical | [Contribution guide](../CONTRIBUTING.md) | Repository-specific development and validation. | GitHub |
+| Progression | [Tavall Database Postgres Progression](../docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md) | Module implementation, validation, and history. | GitHub |
+| Progression | [Tavall Database System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md) | Cross-module architecture and system acceptance. | GitHub |
 
 ## Deployment
 
@@ -51,6 +53,8 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 - **Current PR Stack:** [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26).
 - Repository-specific development guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+- **Progression:** [Module Progression](../docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md) · [System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md).
+- **Module CI:** Missing in audited main: `.tavallci/ci.yaml`.
 
 <details>
 <summary>Documentation Update State</summary>
@@ -59,7 +63,7 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/tavall-database-postgres/README.md` | 2026-09-27 12:59 PM PDT | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/tavall-database-postgres/README.md` | 2026-09-27 5:59 PM PDT | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) |
 | Notion | `NOT_APPLICABLE` | — | 2026-09-27 12:59 PM PDT | README routing surface; no 1:1 twin is assigned. |
 
 ### Update History
@@ -67,5 +71,6 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 | Timestamp | Surface | Event | Location | Previous Location | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-09-27 12:59 PM PDT | GitHub | `CREATED` | `TavallStudios/tavall-database/tavall-database-postgres/README.md` | — | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) | Added a contextual module README with source-backed ownership and routing. |
+| 2026-09-27 5:59 PM PDT | GitHub | `UPDATED` | `TavallStudios/tavall-database/tavall-database-postgres/README.md` | `TavallStudios/tavall-database/tavall-database-postgres/README.md` | [PR #26](https://github.com/TavallStudios/tavall-database/pull/26) | Added module and System Progression routes and recorded module CI state. |
 
 </details>
