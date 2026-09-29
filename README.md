@@ -39,6 +39,7 @@ The contracts module defines common interfaces. Provider modules implement them 
 
 ## Documentation
 
+- [Entity Access Styles](docs/ENTITY_ACCESS_STYLES.md) — the ranked, recommended way for application code to read and write durable state through the entity store.
 - [Contribution guide](CONTRIBUTING.md) — repository-specific development and validation.
 - [Workflow compatibility pointer](docs/quality/GIT_WORKFLOW.md) — redirects to shared policy.
 - [Tavall Docs Git Workflow](https://github.com/TavallStudios/tavall-docs/blob/main/docs/quality/GIT_WORKFLOW.md) — shared contribution and review guidance.
