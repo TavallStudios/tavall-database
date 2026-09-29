@@ -34,7 +34,6 @@ artifacts:
 
 requiredChecks:
   - quality
-  - artifact
 
 checks:
   quality:
@@ -64,6 +63,12 @@ checks:
       - ":tavall-database-qdrant:assemble"
       - ":tavall-database-core:assemble"
       - ":tavall-database-test-suite:assemble"
+      - :tavall-database-core-contracts:tavallCiArtifact
+      - :tavall-database-postgres:tavallCiArtifact
+      - :tavall-database-mongo:tavallCiArtifact
+      - :tavall-database-redis:tavallCiArtifact
+      - :tavall-database-qdrant:tavallCiArtifact
+      - :tavall-database-core:tavallCiArtifact
 
   artifact:
     executor: gradle
@@ -74,3 +79,4 @@ checks:
       - :tavall-database-redis:tavallCiArtifact
       - :tavall-database-qdrant:tavallCiArtifact
       - :tavall-database-core:tavallCiArtifact
+    includeInAll: false
