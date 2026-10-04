@@ -6,8 +6,8 @@
 > **System:** `Tavall Database`  
 > **Owns:** Cross-module contract/provider architecture, consumer assembly, verification state, and system history  
 > **Does Not Own:** Individual module implementation detail, remote database operations, or facts not evidenced in GitHub  
-> **Audited Against:** `TavallStudios/tavall-database@ec7672bc435872c999e6955c34ca90dab35bc9c4`  
-> **Last Reconciled:** `2026-09-27 5:59 PM PDT`
+> **Audited Against:** Current main `d637362444fa02ce49f4b74ac52b8f5a8aec3670` plus Postgres provider checkpoint `0685f72`
+> **Last Reconciled:** `2026-10-04 UTC`
 
 ## About
 
@@ -20,10 +20,10 @@ This record tracks system boundaries and aggregate verification. See each module
 | Field | Value |
 | --- | --- |
 | Repository | [TavallStudios/tavall-database](https://github.com/TavallStudios/tavall-database) |
-| Audited main revision | [`ec7672bc435872c999e6955c34ca90dab35bc9c4`](https://github.com/TavallStudios/tavall-database/commit/ec7672bc435872c999e6955c34ca90dab35bc9c4) |
+| Audited main revision | [`d637362444fa02ce49f4b74ac52b8f5a8aec3670`](https://github.com/TavallStudios/tavall-database/commit/d637362444fa02ce49f4b74ac52b8f5a8aec3670); Postgres feature checkpoint `0685f72` |
 | Build | Gradle multi-project; JDK 25 |
 | Runtime owner | None; consuming applications own provider configuration and service endpoints. |
-| Current PR stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17) and documentation [#26](https://github.com/TavallStudios/tavall-database/pull/26) |
+| Current PR stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17), entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27), and the advisory-lock producer branch `working/postgres-advisory-transaction-lock` awaiting its PR |
 | Overall state | `PARTIAL` |
 
 ## Current Status
@@ -32,10 +32,10 @@ This record tracks system boundaries and aggregate verification. See each module
 | --- | --- |
 | Module boundaries | Seven independent Gradle subprojects are documented below; the root build is an aggregator. |
 | Implementation | 82 production Java source files are tracked across the provider, contracts, and aggregate modules. |
-| Verification | 20 files are tracked under `src/test`; remote database configurations are present, but no Gradle test or database service was run in this documentation pass. |
-| CI ownership | No module-local `.tavallci/ci.yaml` was found in the audited main tree. |
-| Runtime integration | Provider modules are assembled by `tavall-database-core`; no consumer acceptance was verified. |
-| Primary blocker | Module CI and test execution evidence are missing; remote provider compatibility remains unverified. |
+| Verification | `:tavall-database-postgres:check` passed locally at `0685f72` (12 tests passed, five PostgreSQL-service tests skipped); other provider/test-suite modules were not run in this pass. |
+| CI ownership | Exact-source module CI remains open in PR #17 and is not on current main. |
+| Runtime integration | Providers remain assembled by `tavall-database-core`; MC account-link completion is the first candidate consumer and is not accepted yet. |
+| Primary blocker | No PostgreSQL lock contention/rollback run, hosted exact-source Tavall CI run, artifact publication, or package-backed MC consumer result is available yet. |
 
 ## Module Map
 
@@ -55,7 +55,8 @@ This record tracks system boundaries and aggregate verification. See each module
 | --- | --- | --- |
 | Contracts | Depends on Tavall Logging. | Declared in the root build; dependency resolution was not run. |
 | Core aggregate | Depends on contracts and all four provider modules. | Dependency assembly was not built or tested in this audit. |
-| PostgreSQL provider | PostgreSQL, Jakarta Persistence, and Hibernate boundaries; H2/JUnit test dependencies. | No database or test execution was performed. |
+| PostgreSQL provider | PostgreSQL, Jakarta Persistence, and Hibernate boundaries; H2/JUnit test dependencies. | Module check passed locally at `0685f72`; H2/unit paths executed, five PostgreSQL-service cases skipped; no external database service was contacted. |
+| PostgreSQL advisory operation | Typed transaction-scoped lock on `IPostgresEntityOperationContext`; PostgreSQL SQL remains provider-owned. | Producer source and unit checks are present on the feature branch; the MC consumer and service-backed test are pending. See [provider Progression](TAVALL_DATABASE_POSTGRES_PROGRESSION.md). |
 | MongoDB, Redis, Qdrant providers | Depend on their vendor client libraries and the shared contracts. | Remote service behavior is not verified; Redis TLS support is present in source history. |
 | Test suite | Aggregates core/providers and tracks remote database test configurations. | 11 test source files are in the test-suite module; service-backed tests were not run. |
 
@@ -74,13 +75,14 @@ This record tracks system boundaries and aggregate verification. See each module
 | 2026-09-22 3:52 AM PDT | `IN_PROGRESS` | Required explicit JPA entity package configuration. | [`eb8d2e465e07`](https://github.com/TavallStudios/tavall-database/commit/eb8d2e465e0715abb29e15f840d228e9bb1cbdeb) | Entity discovery now requires an explicit package boundary; regression tests were not run in this rollout. |
 | 2026-09-22 5:15 AM PDT | `IN_PROGRESS` | Added a trusted PostgreSQL statement boundary. | [`ac40359d734f`](https://github.com/TavallStudios/tavall-database/commit/ac40359d734f18474fd444881d0b20e6b862374e) | SQL trust boundary changed in source history; no database acceptance is implied. |
 | 2026-09-22 6:26 AM PDT | `IN_PROGRESS` | Avoided invalid Hibernate JNDI registration. | [`05bf86389119`](https://github.com/TavallStudios/tavall-database/commit/05bf86389119982511cfeb2b924d12f08faa0f8b) | Hibernate registration behavior changed; runtime/database verification remains outstanding. |
+| 2026-10-04 UTC | `IN_PROGRESS` | Added typed PostgreSQL transaction advisory lock under the existing atomic entity context. | [`0685f72`](https://github.com/TavallStudios/tavall-database/commit/0685f72) | Provider module check passed locally; the exact-source MC account-link consumer and real PostgreSQL integration remain pending. |
 
 ## Validation State
 
 | Validation | State | Evidence | Remaining Work |
 | --- | --- | --- | --- |
 | Module map and build boundaries | Audited | Main settings/build, source paths, and module READMEs | Reconcile future build/module changes in this system record |
-| Unit tests | Not run | 20 tracked `src/test` files, including the dedicated test-suite sources | Run configured module checks and record test results |
+| Unit tests | Provider-level check passed locally | Postgres `:tavall-database-postgres:check` at `0685f72`: 12 passed; five Postgres service tests skipped; other modules not executed. | Run exact-source module checks through Tavall CI |
 | Database integration | Not run | Remote database fixtures and smoke configurations are tracked; no database service was contacted | Run tests against explicitly configured approved test services and record the result |
 | Consumer acceptance | Not verified | The core module aggregates providers; no consumer build was performed | Verify provider selection/configuration through a consuming application |
 | Module CI | Missing in audited main | No module `.tavallci/ci.yaml` files were found | Add CI definitions through a separate CI-scoped change |
@@ -103,7 +105,7 @@ Add the module CI definitions, run each provider's appropriate tests and remote-
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
 | GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-09-27 5:59 PM PDT | Documentation branch `working/canonical-readme-module-docs-2026-09-27`, PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. |
-| Notion | `TEMPORARY_DRIFT` | Required twin not inspected | 2026-09-27 5:59 PM PDT | User-directed GitHub-only scope; synchronization remains pending. |
+| Notion | `SYNC_PENDING` | Tavall Database System Progression twin | 2026-10-04 UTC | Mirror current Postgres provider owner and exact validation evidence through canonical documentation flow. |
 
 ### Update History
 

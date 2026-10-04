@@ -149,10 +149,10 @@ The callback contains typed entity operations only; the consumer does not receiv
 
 ## 17. Test and Acceptance Model
 
-- Unit test rejects null/blank lock keys and verifies the provider binds the exact key to the fixed PostgreSQL statement.
-- Atomic-store test invokes the lock through `executeAtomic` and confirms context invalidation after the callback.
+- Provider unit tests reject blank lock keys, verify exact parameter binding, and verify that an invalidated operation context rejects further calls.
+- Gated PostgreSQL integration tests invoke the lock through `executeAtomic`, verify same-key serialization, and verify rollback releases the lock.
 - Tavall-MC account-link tests verify deterministic key ordering and that link/audit/session writes use the same atomic callback.
-- PostgreSQL integration must race identical provider claims, different external identities, and cross-account claims; verify unique-index invariants and transaction rollback/release.
+- Consumer PostgreSQL integration must race identical provider claims, different external identities, and cross-account claims; verify unique-index invariants and transaction rollback/release.
 - Package-backed Tavall-MC consumption must be validated independently from exact-source composite resolution.
 
 No PostgreSQL integration result is inferred from unit or source tests.
@@ -182,3 +182,13 @@ See the boundary decision in Section 6. The selected operation is smaller than a
 - Tavall Docs `ENTITY_PERSISTENCE.md` owns cross-repository persistence principles.
 - Tavall Database Postgres Progression owns implementation and provider test status.
 - Tavall-MC Account Progression owns product completion behavior and client/web acceptance.
+
+<details>
+<summary>Documentation Update State</summary>
+
+| Surface | Sync State | Location | Evidence |
+| --- | --- | --- | --- |
+| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database branch `working/postgres-advisory-transaction-lock`, design commit `95fe6e3` |
+| Notion | `SYNC_PENDING` | Required twin not inspected | Create or update through the canonical Tavall documentation flow after connection preflight. |
+
+</details>
