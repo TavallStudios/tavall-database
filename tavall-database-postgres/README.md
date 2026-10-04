@@ -37,6 +37,7 @@ tavall-database/
 | --- | --- | --- | --- |
 | GENERAL | [Repository README](../README.md) | Public overview and module map. | GitHub |
 | Technical | [Contribution guide](../CONTRIBUTING.md) | Repository-specific development and validation. | GitHub |
+| Technical Design | [PostgreSQL Advisory Transaction Lock](../docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md) | Typed transaction-scoped lock capability for atomic entity operations. | GitHub |
 | Progression | [Tavall Database Postgres Progression](../docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md) | Module implementation, validation, and history. | GitHub |
 | Progression | [Tavall Database System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md) | Cross-module architecture and system acceptance. | GitHub |
 
