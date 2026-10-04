@@ -37,6 +37,7 @@ tavall-database/
 | --- | --- | --- | --- |
 | GENERAL | [Repository README](../README.md) | Public overview and module map. | GitHub |
 | Technical | [Contribution guide](../CONTRIBUTING.md) | Repository-specific development and validation. | GitHub |
+| Technical Design | [PostgreSQL Advisory Transaction Lock](../docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md) | Typed transaction-scoped lock capability for atomic entity operations. | GitHub |
 | Progression | [Tavall Database Postgres Progression](../docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md) | Module implementation, validation, and history. | GitHub |
 | Progression | [Tavall Database System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md) | Cross-module architecture and system acceptance. | GitHub |
 
@@ -50,7 +51,7 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 
 - **Module Type:** `PROVIDER`
 - **Runtime:** `None`
-- **Current PR Stack:** [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26).
+- **Current PR Stack:** CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17), entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27), and advisory transaction lock [#29](https://github.com/TavallStudios/tavall-database/pull/29).
 - Repository-specific development guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 - **Progression:** [Module Progression](../docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md) · [System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md).

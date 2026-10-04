@@ -17,6 +17,10 @@ import java.util.Optional;
 final class PostgresEntityOperationContext
         implements IPostgresEntityOperationContext {
 
+    private static final String ADVISORY_TRANSACTION_LOCK_QUERY =
+            "SELECT pg_advisory_xact_lock(" +
+                    "hashtextextended(CAST(:lockKey AS text), 0))";
+
     private final EntityManager entityManager;
     private final Thread ownerThread;
     private volatile boolean active = true;
@@ -177,6 +181,18 @@ final class PostgresEntityOperationContext
             // cannot continue the atomic callback with stale managed entities.
             entityManager.clear();
         }
+    }
+
+    @Override
+    public void acquireAdvisoryTransactionLock(String lockKey) {
+        ensureUsable();
+        String safeLockKey = Objects.requireNonNull(lockKey, "lockKey");
+        if (safeLockKey.isBlank()) {
+            throw new IllegalArgumentException("lockKey must not be blank");
+        }
+        entityManager.createNativeQuery(ADVISORY_TRANSACTION_LOCK_QUERY)
+                .setParameter("lockKey", safeLockKey)
+                .getSingleResult();
     }
 
     void invalidate() {
