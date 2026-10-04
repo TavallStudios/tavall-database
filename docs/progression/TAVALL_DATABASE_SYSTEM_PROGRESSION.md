@@ -6,7 +6,7 @@
 > **System:** `Tavall Database`  
 > **Owns:** Cross-module contract/provider architecture, consumer assembly, verification state, and system history  
 > **Does Not Own:** Individual module implementation detail, remote database operations, or facts not evidenced in GitHub  
-> **Audited Against:** Current main `d637362444fa02ce49f4b74ac52b8f5a8aec3670` plus Postgres provider checkpoint `0685f72`
+> **Audited Against:** Current main `d637362444fa02ce49f4b74ac52b8f5a8aec3670` plus Postgres advisory-lock producer PR #29 and Tavall-MC consumer PR #333
 > **Last Reconciled:** `2026-10-04 UTC`
 
 ## About
@@ -32,10 +32,10 @@ This record tracks system boundaries and aggregate verification. See each module
 | --- | --- |
 | Module boundaries | Seven independent Gradle subprojects are documented below; the root build is an aggregator. |
 | Implementation | 82 production Java source files are tracked across the provider, contracts, and aggregate modules. |
-| Verification | `:tavall-database-postgres:check` passed locally at `0685f72` (12 tests passed, five PostgreSQL-service tests skipped); other provider/test-suite modules were not run in this pass. |
+| Verification | `:tavall-database-postgres:check` passed locally on PR #29 source (12 tests passed, five PostgreSQL-service tests skipped); MC exact-source account-link tests and `:novus-backend:check` also passed locally. Other provider/test-suite modules were not run in this pass. |
 | CI ownership | Exact-source module CI remains open in PR #17 and is not on current main. |
-| Runtime integration | Providers remain assembled by `tavall-database-core`; MC account-link completion is the first candidate consumer and is not accepted yet. |
-| Primary blocker | No PostgreSQL lock contention/rollback run, hosted exact-source Tavall CI run, artifact publication, or package-backed MC consumer result is available yet. |
+| Runtime integration | Providers remain assembled by `tavall-database-core`; MC account-link completion consumes the typed operation in source composition, but PostgreSQL and package-backed acceptance remain open. |
+| Primary blocker | No PostgreSQL lock contention/rollback run, exact-source Tavall CI run, immutable artifact publication, or package-backed MC consumer result is available yet. |
 
 ## Module Map
 
@@ -56,7 +56,7 @@ This record tracks system boundaries and aggregate verification. See each module
 | Contracts | Depends on Tavall Logging. | Declared in the root build; dependency resolution was not run. |
 | Core aggregate | Depends on contracts and all four provider modules. | Dependency assembly was not built or tested in this audit. |
 | PostgreSQL provider | PostgreSQL, Jakarta Persistence, and Hibernate boundaries; H2/JUnit test dependencies. | Module check passed locally at `0685f72`; H2/unit paths executed, five PostgreSQL-service cases skipped; no external database service was contacted. |
-| PostgreSQL advisory operation | Typed transaction-scoped lock on `IPostgresEntityOperationContext`; PostgreSQL SQL remains provider-owned. | Producer source and unit checks are present on the feature branch; the MC consumer and service-backed test are pending. See [provider Progression](TAVALL_DATABASE_POSTGRES_PROGRESSION.md). |
+| PostgreSQL advisory operation | Typed transaction-scoped lock on `IPostgresEntityOperationContext`; PostgreSQL SQL remains provider-owned. | Producer unit checks and MC consumer source tests passed locally; real PostgreSQL and immutable package consumer results remain pending. See [provider Progression](TAVALL_DATABASE_POSTGRES_PROGRESSION.md). |
 | MongoDB, Redis, Qdrant providers | Depend on their vendor client libraries and the shared contracts. | Remote service behavior is not verified; Redis TLS support is present in source history. |
 | Test suite | Aggregates core/providers and tracks remote database test configurations. | 11 test source files are in the test-suite module; service-backed tests were not run. |
 
@@ -84,7 +84,7 @@ This record tracks system boundaries and aggregate verification. See each module
 | Module map and build boundaries | Audited | Main settings/build, source paths, and module READMEs | Reconcile future build/module changes in this system record |
 | Unit tests | Provider-level check passed locally | Postgres `:tavall-database-postgres:check` at `0685f72`: 12 passed; five Postgres service tests skipped; other modules not executed. | Run exact-source module checks through Tavall CI |
 | Database integration | Not run | Remote database fixtures and smoke configurations are tracked; no database service was contacted | Run tests against explicitly configured approved test services and record the result |
-| Consumer acceptance | Not verified | The core module aggregates providers; no consumer build was performed | Verify provider selection/configuration through a consuming application |
+| Consumer acceptance | Partial | Tavall-MC account-link source-composite tests pass locally; PostgreSQL integration, exact-source Tavall CI, and immutable package resolution remain open. | Verify package-backed provider selection/configuration through the consumer |
 | Module CI | Missing in audited main | No module `.tavallci/ci.yaml` files were found | Add CI definitions through a separate CI-scoped change |
 
 ## Blockers
@@ -93,7 +93,8 @@ This record tracks system boundaries and aggregate verification. See each module
 | --- | --- | --- |
 | Module CI and executed verification are absent. | Passing provider behavior cannot be inferred from tracked test sources. | Add module CI definitions and run the configured checks. |
 | Remote database scenarios are unexecuted. | Connection, query, TLS, JPA, and vendor behavior remain unverified against services. | Run the provider tests against explicitly configured approved test services. |
-| Consumer acceptance is unrecorded. | Aggregate dependency use and provider configuration remain unverified from an application. | Build/test a consuming application and record its acceptance evidence. |
+| No immutable artifact is available for package-backed acceptance. | MC artifact resolution without source composition cannot be demonstrated. | Publish/select the exact artifact through Tavall CI and validate the package consumer separately. |
+| MC schema rollout is not accepted. | Test-fixture constraints do not install or upgrade product schema. | Define and use the Tavall Database-owned migration path; test it only against disposable databases. |
 
 ## Next Slice
 
@@ -104,8 +105,8 @@ Add the module CI definitions, run each provider's appropriate tests and remote-
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-09-27 5:59 PM PDT | Documentation branch `working/canonical-readme-module-docs-2026-09-27`, PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. |
-| Notion | `SYNC_PENDING` | Tavall Database System Progression twin | 2026-10-04 UTC | Mirror current Postgres provider owner and exact validation evidence through canonical documentation flow. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-10-04 UTC | PR #29 current candidate; exact head will be updated after version/docs commit. |
+| Notion | `SYNC_PENDING` | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-04 UTC | Update this 1:1 system Progression mirror from the current Git source before marking Git `SYNCED`. |
 
 ### Update History
 

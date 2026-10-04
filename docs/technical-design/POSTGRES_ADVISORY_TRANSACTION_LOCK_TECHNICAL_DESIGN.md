@@ -18,7 +18,7 @@ The first consumer is Tavall-MC account-link completion. It must serialize claim
 
 ## 2. Problem and Objective
 
-The account-link flow currently calls `database.jpa().write(...)`, retains an application-owned `EntityManager` callback, and runs `pg_advisory_xact_lock` itself. That keeps required cross-process serialization, but violates the Tavall Database entity boundary: product code owns a transaction callback and native JPA query.
+Before this capability, the MC account-link flow called `database.jpa().write(...)`, retained an application-owned `EntityManager` callback, and issued `pg_advisory_xact_lock` itself. That preserved cross-process serialization but violated the Tavall Database entity boundary. Tavall-MC PR #333 now consumes the typed operation in its account-link completion candidate.
 
 The current atomic operation context has no typed PostgreSQL advisory-lock operation. Removing the lock or splitting the write into independent entity calls would lose transaction ownership and permit concurrent claims to race before a link row exists.
 
@@ -128,7 +128,7 @@ The advisory lock is transaction-scoped transient database state. PostgreSQL rel
 - The method does not swallow provider failures or fall back to process-local synchronization.
 - Only a bound key value crosses the query boundary; SQL and query construction remain provider-owned.
 - Expiration of the atomic context and cross-thread use remain rejected by the existing thread/lifecycle guard.
-- This is an additive API and requires a minor Tavall Database artifact version for package-backed consumers.
+- This additive API does not assign a floating Maven snapshot in the source PR. Tavall CI's versioning and immutable artifact workflow must select and record the package version, channel, and digest before package-backed consumers can resolve it.
 - Product lock-key strings and sorted lock ordering remain byte-for-byte compatible with the current implementation.
 
 ## 15. Observability and Operator Surface
@@ -151,18 +151,18 @@ The callback contains typed entity operations only; the consumer does not receiv
 
 - Provider unit tests reject blank lock keys, verify exact parameter binding, and verify that an invalidated operation context rejects further calls.
 - Gated PostgreSQL integration tests invoke the lock through `executeAtomic`, verify same-key serialization, and verify rollback releases the lock.
-- Tavall-MC account-link tests verify deterministic key ordering and that link/audit/session writes use the same atomic callback.
+- Tavall-MC account-link tests verify deterministic key ordering and that link/audit/session writes use the same atomic callback. Focused tests and `:novus-backend:check` passed locally on the exact-source consumer candidate.
 - Consumer PostgreSQL integration must race identical provider claims, different external identities, and cross-account claims; verify unique-index invariants and transaction rollback/release.
-- Package-backed Tavall-MC consumption must be validated independently from exact-source composite resolution.
+- Package-backed Tavall-MC consumption must be validated independently from exact-source composite resolution. An ad-hoc local Maven repository is not package-backed acceptance.
 
 No PostgreSQL integration result is inferred from unit or source tests.
 
 ## 18. Implementation / PR Graph
 
-1. This Tavall Database PR adds the Technical Design, provider API, provider tests, and module Progression evidence.
-2. Tavall-MC consumes the exact Database source for DEVELOPMENT/CI and ports account-link completion from local JPA callbacks to `executeAtomic`.
-3. Tavall Database publishes the additive minor artifact through the canonical Tavall CI/dependency workflow.
-4. Tavall-MC proves package-backed resolution separately and runs PostgreSQL integration only against an explicitly disposable test database.
+1. This Tavall Database PR adds the Technical Design, provider API, provider tests, module and system Progression evidence.
+2. Tavall-MC PR #333 consumes the exact Database source and ports account-link completion from local JPA callbacks to `executeAtomic`; source checks passed locally, while hosted Tavall CI remains pending.
+3. Tavall Database publishes the additive provider artifact through Tavall CI's immutable artifact workflow after normal producer review.
+4. Tavall-MC proves package-backed resolution separately from source-composite resolution and runs PostgreSQL integration only against an explicitly disposable test database.
 
 ## 19. Future Separation Triggers
 
@@ -175,7 +175,7 @@ See the boundary decision in Section 6. The selected operation is smaller than a
 ## 21. Open Questions
 
 - Which disposable PostgreSQL service is authorized for Tavall CI integration validation?
-- Which channel/release process publishes the additive provider artifact for package-backed MC consumption?
+- Which immutable Tavall CI artifact version/channel/digest should the consumer select for package-backed validation?
 
 ## 22. Documentation Relationships
 
@@ -188,7 +188,7 @@ See the boundary decision in Section 6. The selected operation is smaller than a
 
 | Surface | Sync State | Location | Evidence |
 | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database PR #29, design commit `95fe6e3`, current head `2940a21079cfea601232a5afeb17555fbe8afb3b` |
-| Notion | `SYNC_PENDING` | Required twin not inspected | Create or update through the canonical Tavall documentation flow after connection preflight. |
+| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database PR #29 current candidate; exact head will be updated after the version/docs commit. |
+| Notion | `SYNC_PENDING` | [PostgreSQL Advisory Transaction Lock — TECHNICAL DESIGN](https://app.notion.com/p/3ef38458ddfd817dbd45cafbad104cc0) | Update this 1:1 mirror from the current Git source before marking Git `SYNCED`. |
 
 </details>
