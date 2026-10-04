@@ -188,7 +188,7 @@ See the boundary decision in Section 6. The selected operation is smaller than a
 
 | Surface | Sync State | Location | Evidence |
 | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database PR #29 current candidate; exact head will be updated after the version/docs commit. |
+| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database PR #29 at `a3a96ee8de03c7c8aac59192c9c5868bda471214`, based on `main@d637362444fa02ce49f4b74ac52b8f5a8aec3670`. |
 | Notion | `SYNC_PENDING` | [PostgreSQL Advisory Transaction Lock — TECHNICAL DESIGN](https://app.notion.com/p/3ef38458ddfd817dbd45cafbad104cc0) | Update this 1:1 mirror from the current Git source before marking Git `SYNCED`. |
 
 </details>

@@ -119,7 +119,7 @@ This record measures the module’s implementation maturity, API/integration sta
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | 2026-10-04 UTC | PR #29 current candidate; exact head will be updated after version/docs commit. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | 2026-10-04 UTC | PR #29 head `a3a96ee8de03c7c8aac59192c9c5868bda471214`, based on `main@d637362444fa02ce49f4b74ac52b8f5a8aec3670`; implementation check passed on code checkpoint `f8cdf3a`. |
 | Notion | `SYNC_PENDING` | [tavall-database-postgres — PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db) | 2026-10-04 UTC | Update this 1:1 module Progression mirror from the current Git source before marking Git `SYNCED`. |
 
 ### Update History

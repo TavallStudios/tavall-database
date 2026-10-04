@@ -105,7 +105,7 @@ Add the module CI definitions, run each provider's appropriate tests and remote-
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-10-04 UTC | PR #29 current candidate; exact head will be updated after version/docs commit. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-10-04 UTC | PR #29 head `a3a96ee8de03c7c8aac59192c9c5868bda471214`, based on `main@d637362444fa02ce49f4b74ac52b8f5a8aec3670`. |
 | Notion | `SYNC_PENDING` | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-04 UTC | Update this 1:1 system Progression mirror from the current Git source before marking Git `SYNCED`. |
 
 ### Update History
