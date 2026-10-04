@@ -23,7 +23,7 @@ This record tracks system boundaries and aggregate verification. See each module
 | Audited main revision | [`d637362444fa02ce49f4b74ac52b8f5a8aec3670`](https://github.com/TavallStudios/tavall-database/commit/d637362444fa02ce49f4b74ac52b8f5a8aec3670); Postgres feature checkpoint `0685f72` |
 | Build | Gradle multi-project; JDK 25 |
 | Runtime owner | None; consuming applications own provider configuration and service endpoints. |
-| Current PR stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17), entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27), and the advisory-lock producer branch `working/postgres-advisory-transaction-lock` awaiting its PR |
+| Current PR stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17), entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27), and advisory-lock producer [#29](https://github.com/TavallStudios/tavall-database/pull/29) |
 | Overall state | `PARTIAL` |
 
 ## Current Status

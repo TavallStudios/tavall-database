@@ -27,7 +27,7 @@ This record measures the module’s implementation maturity, API/integration sta
 | System Progression | [Tavall Database System Progression](TAVALL_DATABASE_SYSTEM_PROGRESSION.md) |
 | Runtime Owner | `None` |
 | Primary Consumers | Tavall-MC account-link completion is the first candidate consumer; exact-source and package-backed acceptance are pending. |
-| Current Branch / PR Stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17); entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27); advisory-lock producer branch `working/postgres-advisory-transaction-lock` awaits a PR. |
+| Current Branch / PR Stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17); entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27); advisory-lock producer [#29](https://github.com/TavallStudios/tavall-database/pull/29), OPEN/DRAFT at `2940a21079cfea601232a5afeb17555fbe8afb3b`. |
 | Audited Revision | Current main base `d637362444fa02ce49f4b74ac52b8f5a8aec3670`; advisory-lock implementation checkpoint `f199689`. |
 
 ## Current Status
@@ -116,7 +116,7 @@ This record measures the module’s implementation maturity, API/integration sta
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | 2026-10-04 UTC | Advisory-lock feature branch based on `main@d637362444fa02ce49f4b74ac52b8f5a8aec3670`; provider check passed locally at `0685f72`. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | 2026-10-04 UTC | PR #29 head `2940a21079cfea601232a5afeb17555fbe8afb3b`, based on `main@d637362444fa02ce49f4b74ac52b8f5a8aec3670`; provider check passed locally at `0685f72`. |
 | Notion | `SYNC_PENDING` | Required twin not inspected | 2026-10-04 UTC | Update through the canonical Tavall documentation flow after connection preflight. |
 
 ### Update History

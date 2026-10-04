@@ -51,7 +51,7 @@ Runtime owner: `None`. No Deployment record applies to this library or test-only
 
 - **Module Type:** `PROVIDER`
 - **Runtime:** `None`
-- **Current PR Stack:** [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26).
+- **Current PR Stack:** CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17), entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27), and advisory transaction lock [#29](https://github.com/TavallStudios/tavall-database/pull/29).
 - Repository-specific development guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 - **Progression:** [Module Progression](../docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md) · [System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md).

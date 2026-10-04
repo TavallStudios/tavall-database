@@ -188,7 +188,7 @@ See the boundary decision in Section 6. The selected operation is smaller than a
 
 | Surface | Sync State | Location | Evidence |
 | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database branch `working/postgres-advisory-transaction-lock`, design commit `95fe6e3` |
+| GitHub | `PRIMARY` | `docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md` | Tavall Database PR #29, design commit `95fe6e3`, current head `2940a21079cfea601232a5afeb17555fbe8afb3b` |
 | Notion | `SYNC_PENDING` | Required twin not inspected | Create or update through the canonical Tavall documentation flow after connection preflight. |
 
 </details>
