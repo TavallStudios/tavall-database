@@ -111,6 +111,14 @@ subprojects {
             }
         }
         repositories {
+            // Exact-source publication target (Tavall CI staging repository); unset by default.
+            val exactSourceRepository = providers.gradleProperty("tavallPublishRepository").orNull
+            if (!exactSourceRepository.isNullOrBlank()) {
+                maven {
+                    name = "TavallExactSource"
+                    url = uri(exactSourceRepository)
+                }
+            }
             val token = providers.environmentVariable("GITHUB_TOKEN")
             if (token.isPresent) {
                 maven {
