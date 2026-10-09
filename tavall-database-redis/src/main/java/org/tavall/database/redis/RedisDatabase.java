@@ -1,25 +1,43 @@
 package org.tavall.database.redis;
 
+import java.util.Objects;
 import org.tavall.database.core.database.AbstractDatabase;
 import org.tavall.database.core.database.IDatabaseType;
-import org.tavall.database.redis.connection.IRedisConnectionHandler;
+import org.tavall.database.redis.connection.IJedisRedisConnectionHandler;
+import org.tavall.database.redis.connection.RedisConnectionHandler;
+import org.tavall.database.redis.lease.IRedisLeaseHandler;
+import org.tavall.database.redis.lease.RedisLeaseHandler;
 import org.tavall.database.redis.query.IRedisQueryHandler;
+import org.tavall.database.redis.query.RedisQueryHandler;
+import org.tavall.database.redis.record.IRedisVersionedRecordHandler;
+import org.tavall.database.redis.record.RedisVersionedRecordHandler;
 
-import java.util.Objects;
+/**
+ * Jedis-backed Redis database. Owns its connection pool and the typed capability handlers composed over it;
+ * {@link #close()} closes the pool, after which every capability fails with {@code RedisConnectionException}.
+ */
+public final class RedisDatabase extends AbstractDatabase<IRedisConfigData> implements IJedisRedisDatabase {
 
-public final class RedisDatabase extends AbstractDatabase<IRedisConfigData> implements IRedisDatabase {
-
-    private final IRedisConnectionHandler connections;
+    private final IJedisRedisConnectionHandler connections;
     private final IRedisQueryHandler queries;
+    private final IRedisLeaseHandler leases;
+    private final IRedisVersionedRecordHandler records;
 
-    public RedisDatabase(
-            IRedisConfigData configData,
-            IRedisConnectionHandler connections,
-            IRedisQueryHandler queries
-    ) {
+    /** Composition performed by {@link RedisDatabaseBuilder}; the handlers share this database's pool. */
+    RedisDatabase(IRedisConfigData configData, RedisConnectionHandler connections) {
+        this(configData, connections, new RedisQueryHandler(connections));
+    }
+
+    /**
+     * Explicit composition for callers that supply their own connection and query handlers, such as tests.
+     * Lease and record handlers are composed over the supplied connection handler.
+     */
+    public RedisDatabase(IRedisConfigData configData, IJedisRedisConnectionHandler connections, IRedisQueryHandler queries) {
         super(RedisDatabaseType.REDIS, configData, queries);
         this.connections = Objects.requireNonNull(connections, "connections");
         this.queries = Objects.requireNonNull(queries, "queries");
+        this.leases = new RedisLeaseHandler(connections);
+        this.records = new RedisVersionedRecordHandler(connections);
     }
 
     @Override
@@ -33,13 +51,23 @@ public final class RedisDatabase extends AbstractDatabase<IRedisConfigData> impl
     }
 
     @Override
-    public IRedisConnectionHandler connections() {
+    public IJedisRedisConnectionHandler connections() {
         return connections;
     }
 
     @Override
     public IRedisQueryHandler queries() {
         return queries;
+    }
+
+    @Override
+    public IRedisLeaseHandler leases() {
+        return leases;
+    }
+
+    @Override
+    public IRedisVersionedRecordHandler records() {
+        return records;
     }
 
     @Override
@@ -52,4 +80,3 @@ public final class RedisDatabase extends AbstractDatabase<IRedisConfigData> impl
         connections.close();
     }
 }
-
