@@ -12,11 +12,18 @@ pluginManagement {
         }
     }
     repositories {
-        val tavallSnapshots = file("/srv/dev-storage/deps/private/snapshots")
-        if (tavallSnapshots.isDirectory) {
+        // Tavall internal artifact repository (same convention as Tavall Cloud): an explicit URL wins, and the
+        // development host's internal repository is the default only where it exists.
+        val tavallInternalRepository = providers.gradleProperty("TAVALL_INTERNAL_PRIVATE_REPOSITORY_URL")
+            .orElse(providers.environmentVariable("TAVALL_INTERNAL_PRIVATE_REPOSITORY_URL"))
+            .orNull
+            ?.takeIf(String::isNotBlank)
+            ?: "/srv/dev-storage/deps/private/snapshots".takeIf { file(it).isDirectory }
+        if (tavallInternalRepository != null) {
             maven {
-                name = "TavallSnapshots"
-                url = uri(tavallSnapshots)
+                name = "TavallInternalPrivate"
+                url = if (tavallInternalRepository.contains("://")) uri(tavallInternalRepository) else uri(file(tavallInternalRepository))
+                content { includeGroupByRegex("org\\.tavall(?:\\..*)?") }
             }
         }
         gradlePluginPortal()

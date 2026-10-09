@@ -176,7 +176,7 @@ project(":tavall-database-redis-api") {
         doLast {
             val leaked = compileClasspath.get().resolvedConfiguration.resolvedArtifacts
                 .map { "${it.moduleVersion.id.group}:${it.name}" }
-                .filter { it.startsWith("redis.clients:") || it.startsWith("io.lettuce:") || it.startsWith("org.redisson:") }
+                .filter { it.startsWith("redis.clients") || it.startsWith("io.lettuce") || it.startsWith("org.redisson") }
             check(leaked.isEmpty()) { "tavall-database-redis-api must not expose a concrete Redis client: $leaked" }
         }
     }
