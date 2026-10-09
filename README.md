@@ -13,6 +13,7 @@ Tavall Database is a modular Java library for shared database contracts and conc
 - Common database, builder, query-handler, and result-mapper interfaces.
 - PostgreSQL support with entity-store and JPA boundaries.
 - MongoDB, Redis, and Qdrant provider modules.
+- A client-free Redis API with typed operations, expiring leases, and fenced versioned records, separate from the Jedis provider.
 - An aggregate consumer module and cross-provider test suite.
 
 ## Quick Start
@@ -25,13 +26,43 @@ This repository does not document published dependency coordinates. Use JDK 25 a
 
 ## How It Works
 
-The contracts module defines common interfaces. Provider modules implement them for each backing system. The core module aggregates the current providers for consumers, while the test-suite module verifies combined behavior.
+The contracts module defines common interfaces. Provider modules implement them for each backing system. Redis is split: the client-free [`tavall-database-redis-api`](tavall-database-redis-api/README.md) defines the Redis contracts and provider SPI, and [`tavall-database-redis`](tavall-database-redis/README.md) supplies the Jedis provider. The core module aggregates the current providers for consumers, while the test-suite module verifies combined behavior.
+
+## Module Map
+
+| Module | Module Type | Role | Runtime | Boundary |
+| --- | --- | --- | --- | --- |
+| [`tavall-database-core-contracts`](tavall-database-core-contracts/README.md) | `API` | Shared database, builder, configuration, query, and result contracts | None | Provider-neutral contracts |
+| [`tavall-database-redis-api`](tavall-database-redis-api/README.md) | `API` | Client-free Redis contracts, leases, fenced records, provider SPI | Owning consumer runtime | Redis public API; no concrete client |
+| [`tavall-database-redis`](tavall-database-redis/README.md) | `FEATURE` | Jedis-backed Redis provider | None | Secondary role: `PROVIDER` |
+| [`tavall-database-postgres`](tavall-database-postgres/README.md) | `PROVIDER` | PostgreSQL and JPA provider | None | Provider implementation |
+| [`tavall-database-mongo`](tavall-database-mongo/README.md) | `PROVIDER` | MongoDB provider | None | Provider implementation |
+| [`tavall-database-qdrant`](tavall-database-qdrant/README.md) | `PROVIDER` | Qdrant provider | None | Provider implementation |
+| [`tavall-database-core`](tavall-database-core/README.md) | `LIBRARY` | Aggregate consumer dependency surface | None | Aggregate |
+| [`tavall-database-test-suite`](tavall-database-test-suite/README.md) | `TEST_SUITE` | Cross-provider and Redis contract tests | None | Verification only |
+
+## Dependency Graph
+
+```text
+tavall-database-core-contracts
+  ├── tavall-database-redis-api
+  │     └── tavall-database-redis (Jedis provider)
+  ├── tavall-database-postgres
+  ├── tavall-database-mongo
+  └── tavall-database-qdrant
+
+tavall-database-core ──► core-contracts, redis-api, redis, postgres, mongo, qdrant
+tavall-database-test-suite ──► core, redis-api, redis, postgres, mongo, qdrant
+```
+
+`tavall-database-redis-api` depends only on `tavall-database-core-contracts`. No concrete Redis client may reach its compile classpath.
 
 ## Project Structure
 
 ├── [`tavall-database-core-contracts`](tavall-database-core-contracts/README.md)
 ├── [`tavall-database-postgres`](tavall-database-postgres/README.md)
 ├── [`tavall-database-mongo`](tavall-database-mongo/README.md)
+├── [`tavall-database-redis-api`](tavall-database-redis-api/README.md)
 ├── [`tavall-database-redis`](tavall-database-redis/README.md)
 ├── [`tavall-database-qdrant`](tavall-database-qdrant/README.md)
 ├── [`tavall-database-core`](tavall-database-core/README.md)
