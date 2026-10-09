@@ -129,6 +129,32 @@ class RedisDatabaseContractTest {
     }
 
     @Test
+    void leaseFencingTokensIncreaseAndStaleHoldersCannotOverwriteNewerRecords() throws InterruptedException {
+        IRedisLeaseHandler leases = database.leases();
+        IRedisVersionedRecordHandler records = database.records();
+        RedisKey leaseKey = RedisKey.of("tavall-database-test", "lease", "fenced-writer");
+        RedisKey recordKey = RedisKey.of("tavall-database-test", "record", "fenced-writer");
+
+        RedisLease paused = leases.acquire(leaseKey, "writer-a", Duration.ofMillis(150)).orElseThrow();
+        records.create(recordKey, new RedisVersionedRecord(1, paused.fencingToken(), "a-1"));
+        Thread.sleep(300);
+        RedisLease current = leases.acquire(leaseKey, "writer-b", Duration.ofSeconds(5)).orElseThrow();
+        assertTrue(current.fencingToken() > paused.fencingToken());
+
+        RedisVersionedRecord seenByB = records.read(recordKey).orElseThrow();
+        RedisRecordWriteResult written = records.compareAndSet(recordKey, seenByB.fence(),
+                new RedisVersionedRecord(2, current.fencingToken(), "b-2"));
+        assertTrue(written.applied());
+        assertEquals(Optional.of(new RedisVersionedRecord(2, current.fencingToken(), "b-2")), written.current());
+
+        // Writer A resumes after its lease expired: its own lower fencing token can never replace B's record.
+        RedisVersionedRecord seenByA = records.read(recordKey).orElseThrow();
+        assertThrows(IllegalArgumentException.class, () -> records.compareAndSet(recordKey, seenByA.fence(),
+                new RedisVersionedRecord(3, paused.fencingToken(), "a-3")));
+        assertEquals("b-2", records.read(recordKey).orElseThrow().payload());
+    }
+
+    @Test
     void fencedRecordsRejectStaleAndMissingWrites() {
         IRedisVersionedRecordHandler records = database.records();
         RedisKey key = RedisKey.of("tavall-database-test", "record", "fenced");
@@ -177,7 +203,7 @@ class RedisDatabaseContractTest {
     }
 
     @Test
-    void stateSurvivesProviderRestartAndClosedHandlersFailFast() {
+    void stateSurvivesProviderReconnectAndClosedHandlersFailFast() {
         RedisKey key = RedisKey.of("tavall-database-test", "record", "recovery");
         RedisVersionedRecord stored = new RedisVersionedRecord(7, 3, "{\"recovered\":true}");
         database.records().create(key, stored);

@@ -8,6 +8,11 @@ import org.tavall.database.redis.key.RedisKey;
  * Each operation executes as one server-side script, so concurrent writers serialize and stale writers are
  * rejected without partially applying.
  *
+ * <p>Every result's {@code current} record is read inside the same atomic script as the write, so it is
+ * exactly the state the operation left or found. To fence writers, set {@code fenceEpoch} from a strictly
+ * increasing authority token such as {@code RedisLease.fencingToken()}: a stale holder's lower epoch can never
+ * replace a newer writer's record.</p>
+ *
  * <p>Key layout, payload schema, indexes, and reconciliation policy remain with the domain owner.</p>
  */
 public interface IRedisVersionedRecordHandler {

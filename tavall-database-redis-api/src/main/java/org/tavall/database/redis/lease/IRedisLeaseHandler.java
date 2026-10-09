@@ -8,7 +8,10 @@ import org.tavall.database.redis.key.RedisKey;
  * Expiring mutual-exclusion leases. Acquire is atomic set-if-absent with expiry; renew and release are
  * compare-by-token so a stale holder can never extend or delete another holder's lease.
  *
- * <p>A lease is coordination, not durable authority: the domain owner still fences its durable writes.</p>
+ * <p>Every successful acquisition also draws a strictly increasing {@link RedisLease#fencingToken()} from a
+ * companion counter key ({@code <key>:fencing-token}). A lease is coordination, not durable authority: the
+ * domain owner fences its writes with that token, for example as the {@code fenceEpoch} of
+ * {@code IRedisVersionedRecordHandler} writes.</p>
  */
 public interface IRedisLeaseHandler {
 

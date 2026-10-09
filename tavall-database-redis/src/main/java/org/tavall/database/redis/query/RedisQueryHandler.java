@@ -1,5 +1,6 @@
 package org.tavall.database.redis.query;
 
+import org.tavall.database.redis.RedisProviderCalls;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -24,45 +25,48 @@ public final class RedisQueryHandler implements IRedisQueryHandler {
     @Override
     public Optional<String> get(RedisKey key) {
         Objects.requireNonNull(key, "key");
-        return Optional.ofNullable(client().get(key.value()));
+        return Optional.ofNullable(RedisProviderCalls.call(() -> client().get(key.value())));
     }
 
     @Override
     public void set(RedisKey key, String value) {
         Objects.requireNonNull(key, "key");
-        client().set(key.value(), Objects.requireNonNull(value, "value"));
+        RedisProviderCalls.call(() -> client().set(key.value(), Objects.requireNonNull(value, "value")));
     }
 
     @Override
     public void set(RedisKey key, String value, Duration timeToLive) {
         Objects.requireNonNull(key, "key");
-        client().set(key.value(), Objects.requireNonNull(value, "value"), SetParams.setParams().px(positiveMillis(timeToLive)));
+        long millis = positiveMillis(timeToLive);
+        RedisProviderCalls.call(() -> client().set(key.value(), Objects.requireNonNull(value, "value"),
+                SetParams.setParams().px(millis)));
     }
 
     @Override
     public boolean setIfAbsent(RedisKey key, String value, Duration timeToLive) {
         Objects.requireNonNull(key, "key");
-        String reply = client().set(key.value(), Objects.requireNonNull(value, "value"),
-                SetParams.setParams().nx().px(positiveMillis(timeToLive)));
+        long millis = positiveMillis(timeToLive);
+        String reply = RedisProviderCalls.call(() -> client().set(key.value(), Objects.requireNonNull(value, "value"),
+                SetParams.setParams().nx().px(millis)));
         return "OK".equals(reply);
     }
 
     @Override
     public boolean delete(RedisKey key) {
         Objects.requireNonNull(key, "key");
-        return client().del(key.value()) > 0;
+        return RedisProviderCalls.call(() -> client().del(key.value())) > 0;
     }
 
     @Override
     public boolean expire(RedisKey key, Duration timeToLive) {
         Objects.requireNonNull(key, "key");
-        return client().pexpire(key.value(), positiveMillis(timeToLive)) == 1L;
+        return RedisProviderCalls.call(() -> client().pexpire(key.value(), positiveMillis(timeToLive))) == 1L;
     }
 
     @Override
     public Optional<Duration> timeToLive(RedisKey key) {
         Objects.requireNonNull(key, "key");
-        long remaining = client().pttl(key.value());
+        long remaining = RedisProviderCalls.call(() -> client().pttl(key.value()));
         return remaining >= 0 ? Optional.of(Duration.ofMillis(remaining)) : Optional.empty();
     }
 
