@@ -56,7 +56,7 @@ Runtime owner: `None`. Consumers select this provider at their composition bound
 - **Module Type:** `FEATURE`
 - **Secondary Role:** `PROVIDER`
 - **Runtime:** `None`
-- **Current PR Stack:** Local branch `working/redis-api-module-20261009` at [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124), not pushed. Prior stack: [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26).
+- **Current PR Stack:** [PR #30](https://github.com/TavallStudios/tavall-database/pull/30) (`working/redis-api-module-20261009`). Prior stack: [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26).
 - Repository-specific development guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 - **Progression:** [Module Progression](../docs/progression/TAVALL_DATABASE_REDIS_PROGRESSION.md) · [System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md).

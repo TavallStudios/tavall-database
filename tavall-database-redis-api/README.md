@@ -120,7 +120,7 @@ public final class CampaignStateHandler implements ICampaignStateHandler, Depend
 
             RedisVersionedRecord next = new RedisVersionedRecord(
                     current.version() + 1,
-                    current.fenceEpoch(),
+                    lease.fencingToken(),
                     nextPayload);
 
             RedisRecordWriteResult result = redis.records().compareAndSet(stateKey, current.fence(), next);
@@ -144,6 +144,9 @@ Version `1.0.0` to `1.1.0` is a source-breaking change for raw-client consumers.
 | Raw client access | Available on the common interface. | `RedisDatabaseBuilder.buildJedis()` returns `IJedisRedisDatabase`, whose `connections()` returns `IJedisRedisConnectionHandler`. |
 | Generic build | `build()` returned the Redis database. | `build()` still returns `Optional<IRedisDatabase>`; use `buildJedis()` only where raw Jedis is required. |
 | Typed capabilities | Not in the common contract. | `leases()` and `records()` added, with typed `IRedisQueryHandler` operations. |
+| Implementers of the interfaces | — | `IRedisDatabase` gained abstract `leases()` and `records()`; `IRedisQueryHandler` gained six abstract typed methods. Custom implementations and test fakes must implement them (source break). |
+| Provider constructors | `RedisDatabase(IRedisConfigData, IRedisConnectionHandler, IRedisQueryHandler)`, `RedisQueryHandler(IRedisConnectionHandler)` | Parameters are now `IJedisRedisConnectionHandler`. Callers recompile against 1.1.0 (binary break). |
+| Lease record | — | `RedisLease` carries `fencingToken`, a per-key strictly increasing token drawn at acquisition. |
 
 Migration:
 - Consumers that only need Redis operations: depend on `tavall-database-redis-api` and use `IRedisDatabase`.
@@ -153,7 +156,7 @@ Removal condition for the `IJedis*` compatibility types: remove them once Tavall
 
 ## Tests and Evidence
 
-Evidence is taken from commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`. The results below are the values recorded in that commit message. This documentation change did not rerun them.
+Evidence is taken from commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`. The results below were first recorded in that commit message. After PR #30 review, `RedisDatabaseContractTest` grew to 9 tests (lease fencing tokens and a stale holder rejected by the fence) and passes 9/9 against `redis:8-alpine`; "reconnect recovery" is now named reconnect recovery, because the test reopens the provider against the same running Redis.
 
 Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, run against a real `redis:8-alpine` container through Testcontainers (8 tests):
 
@@ -173,7 +176,8 @@ Build enforcement: `verifyClientFreeApi` runs as part of `check`.
 ## Risks
 
 - Source-breaking for 1.0.0 raw-Jedis consumers until they migrate; the `IJedis*` compatibility types keep them compiling only when they depend on `tavall-database-redis`.
-- Leases are advisory coordination. A process that pauses past its lease TTL can still attempt a durable write. The fence must reject that write.
+- Leases are advisory coordination. A process that pauses past its lease TTL can still attempt a write. Writing with `fenceEpoch = lease.fencingToken()` makes the fence reject it: each acquisition draws a strictly higher token, and `compareAndSet` refuses an epoch lower than the stored one.
+- Generic `queries()` operations can address any key, including lease and record keys, and would bypass their token and fence checks. Keep lease and record key families separate from generic string keys.
 - `RedisVersionedRecord.payload` is opaque to this module. Schema drift is the domain owner's risk.
 - The module has no module-local `.tavallci/ci.yaml` in this repository yet, so CI ownership is not declared at module level.
 - Remote Redis compatibility (managed services, TLS endpoints, cluster topology) was not exercised.
@@ -209,7 +213,7 @@ Runtime owner: the owning consumer runtime composes this API. No Deployment reco
 - **Module Type:** `API`
 - **Runtime:** Owning consumer runtime (not deployed by this module)
 - **CI Definition:** Module-local `.tavallci/ci.yaml` is not present yet; required by the README standards and tracked as a progression blocker.
-- **Current PR Stack:** Local branch `working/redis-api-module-20261009` at [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124). Not pushed; not published to GitHub Packages.
+- **Current PR Stack:** [PR #30](https://github.com/TavallStudios/tavall-database/pull/30) (`working/redis-api-module-20261009`). Not published to GitHub Packages or the internal repository.
 - **Progression:** [Module Progression](../docs/progression/TAVALL_DATABASE_REDIS_API_PROGRESSION.md) · [System Progression](../docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md).
 - Repository-specific development guide: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -220,7 +224,7 @@ Runtime owner: the owning consumer runtime composes this API. No Deployment reco
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `TEMPORARY_DRIFT` | `TavallStudios/tavall-database/tavall-database-redis-api/README.md` | 2026-10-09 2:13 PM PDT | Local worktree `working/redis-api-module-20261009`; commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) base. Not pushed. |
+| GitHub | `TEMPORARY_DRIFT` | `TavallStudios/tavall-database/tavall-database-redis-api/README.md` | 2026-10-09 3:30 PM PDT | Open [PR #30](https://github.com/TavallStudios/tavall-database/pull/30); review fixes for atomic CAS results and lease fencing tokens. |
 | Notion | `NOT_APPLICABLE` | — | 2026-10-09 2:13 PM PDT | README routing surface; no 1:1 twin is assigned. |
 
 ### Update History

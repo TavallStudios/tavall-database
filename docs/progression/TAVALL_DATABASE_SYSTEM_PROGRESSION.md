@@ -56,7 +56,7 @@ This record tracks system boundaries and aggregate verification. See each module
 | --- | --- | --- |
 | Contracts | Depends on Tavall Logging. | Declared in the root build; dependency resolution was not run. |
 | Core aggregate | Depends on contracts, the Redis API, and all four provider modules. | Dependency assembly was not built or tested in this audit; the Redis edges were built and tested locally per `98b9312`. |
-| Redis API | Depends only on `core-contracts`; `verifyClientFreeApi` fails `check` if a concrete Redis client reaches its compile classpath. | Validated locally per `98b9312`; not pushed or published. |
+| Redis API | Depends only on `core-contracts`; `verifyClientFreeApi` fails `check` if a concrete Redis client reaches its compile classpath. | Validated locally; open [PR #30](https://github.com/TavallStudios/tavall-database/pull/30); not published. |
 | PostgreSQL provider | PostgreSQL, Jakarta Persistence, and Hibernate boundaries; H2/JUnit test dependencies. | No database or test execution was performed. |
 | MongoDB, Redis, Qdrant providers | MongoDB and Qdrant depend on vendor client libraries and the shared contracts. The Redis provider depends on the Redis API and Jedis. | Remote service behavior is not verified; Redis TLS support is present in source history. |
 | Test suite | Aggregates core/providers and tracks remote database test configurations. | 11 test source files are in the test-suite module; service-backed tests were not run. |
