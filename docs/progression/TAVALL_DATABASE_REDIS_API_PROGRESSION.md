@@ -105,7 +105,7 @@ Add the module `.tavallci/ci.yaml`, obtain CI-gated evidence for the exact pushe
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `TEMPORARY_DRIFT` | `docs/progression/TAVALL_DATABASE_REDIS_API_PROGRESSION.md` in `working/redis-api-module-20261009` | 2026-10-09 2:13 PM PDT | Local worktree; commit `98b9312` as audited revision. Not pushed. |
+| GitHub | `TEMPORARY_DRIFT` | `docs/progression/TAVALL_DATABASE_REDIS_API_PROGRESSION.md` in `working/redis-api-module-20261009` | 2026-10-10 | Open [PR #30](https://github.com/TavallStudios/tavall-database/pull/30); lease-fenced writes added after re-review. |
 | Notion | `TEMPORARY_DRIFT` | Required twin not created | 2026-10-09 2:13 PM PDT | Pending GitHub publication; no Notion page was created in this change. |
 
 ### Update History

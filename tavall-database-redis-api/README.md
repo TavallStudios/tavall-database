@@ -118,12 +118,10 @@ public final class CampaignStateHandler implements ICampaignStateHandler, Depend
                     .read(stateKey)
                     .orElseThrow(() -> new IllegalStateException("Campaign state missing: " + campaignId));
 
-            RedisVersionedRecord next = new RedisVersionedRecord(
-                    current.version() + 1,
-                    lease.fencingToken(),
-                    nextPayload);
-
-            RedisRecordWriteResult result = redis.records().compareAndSet(stateKey, current.fence(), next);
+            // Checked inside Redis: this acquisition still holds the lease and the stored epoch is not newer
+            // than lease.fencingToken(); the written record carries that token as its epoch.
+            RedisRecordWriteResult result = redis.records()
+                    .compareAndSetUnderLease(stateKey, current.fence(), current.version() + 1, nextPayload, lease);
             if (!result.applied()) {
                 throw new IllegalStateException("Fenced write rejected: " + result.state());
             }
@@ -146,7 +144,9 @@ Version `1.0.0` to `1.1.0` is a source-breaking change for raw-client consumers.
 | Typed capabilities | Not in the common contract. | `leases()` and `records()` added, with typed `IRedisQueryHandler` operations. |
 | Implementers of the interfaces | — | `IRedisDatabase` gained abstract `leases()` and `records()`; `IRedisQueryHandler` gained six abstract typed methods. Custom implementations and test fakes must implement them (source break). |
 | Provider constructors | `RedisDatabase(IRedisConfigData, IRedisConnectionHandler, IRedisQueryHandler)`, `RedisQueryHandler(IRedisConnectionHandler)` | Parameters are now `IJedisRedisConnectionHandler`. Callers recompile against 1.1.0 (binary break). |
-| Lease record | — | `RedisLease` carries `fencingToken`, a per-key strictly increasing token drawn at acquisition. |
+| Lease record | — | `RedisLease` gained a positional `long fencingToken` before `timeToLive` (source and binary break for constructor callers); it is drawn per key at acquisition. |
+| Lease-fenced writes | — | `IRedisVersionedRecordHandler` gained `createUnderLease` and `compareAndSetUnderLease` (source break for implementers). |
+| Exceptions | Jedis exceptions escaped the typed calls. | Provider calls map Jedis failures to `RedisConnectionException` / `RedisQueryException`; callers catching `JedisException` or `IllegalStateException` must catch the Redis API exceptions. |
 
 Migration:
 - Consumers that only need Redis operations: depend on `tavall-database-redis-api` and use `IRedisDatabase`.
@@ -156,9 +156,9 @@ Removal condition for the `IJedis*` compatibility types: remove them once Tavall
 
 ## Tests and Evidence
 
-Evidence is taken from commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`. The results below were first recorded in that commit message. After PR #30 review, `RedisDatabaseContractTest` grew to 9 tests (lease fencing tokens and a stale holder rejected by the fence) and passes 9/9 against `redis:8-alpine`; "reconnect recovery" is now named reconnect recovery, because the test reopens the provider against the same running Redis.
+Evidence is taken from commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`. The results below were first recorded in that commit message. After the PR #30 reviews, `RedisDatabaseContractTest` has 10 tests and passes 10/10 against `redis:8-alpine`. The former "restart recovery" test is named reconnect recovery, because it reopens the provider against the same running Redis.
 
-Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, run against a real `redis:8-alpine` container through Testcontainers (8 tests):
+Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, run against a real `redis:8-alpine` container through Testcontainers (10 tests):
 
 - `providerLoaderSelectsTheSingleRuntimeProvider`
 - `publicApiExposesNoConcreteClientTypes`
@@ -167,7 +167,9 @@ Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, 
 - `leaseTokensIsolateStaleHoldersAfterExpiry`
 - `fencedRecordsRejectStaleAndMissingWrites`
 - `concurrentCompareAndSetAppliesOneWriterPerVersion`
-- `stateSurvivesProviderRestartAndClosedHandlersFailFast`
+- `stateSurvivesProviderReconnectAndClosedHandlersFailFast`
+- `leaseFencingTokensIncreaseAndStaleHoldersCannotOverwriteNewerRecords`
+- `leaseFencedWritesRejectAnExpiredHolderBeforeAndAfterTheNextHolderWrites`
 
 Other recorded evidence: `./gradlew --write-locks clean check` succeeded; `CanonicalArchitectureTest` 1/1 and `DatabaseBuilderTypingTest` 5/5 passed; remote smoke tests were skipped because remote database environment variables are not configured.
 
@@ -176,7 +178,9 @@ Build enforcement: `verifyClientFreeApi` runs as part of `check`.
 ## Risks
 
 - Source-breaking for 1.0.0 raw-Jedis consumers until they migrate; the `IJedis*` compatibility types keep them compiling only when they depend on `tavall-database-redis`.
-- Leases are advisory coordination. A process that pauses past its lease TTL can still attempt a write. Writing with `fenceEpoch = lease.fencingToken()` makes the fence reject it: each acquisition draws a strictly higher token, and `compareAndSet` refuses an epoch lower than the stored one.
+- Leases are advisory coordination. A process that pauses past its lease TTL can still attempt a write. Use `createUnderLease` / `compareAndSetUnderLease`: they reject the write inside Redis unless this exact acquisition still holds the lease and the stored epoch is not newer than its fencing token. Plain `create` / `compareAndSet` do not consult a lease.
+- The fencing counter (`<lease key>:fencing-token`) must be as durable as the records it fences: run Redis with `noeviction` and persistence. If the counter is evicted or deleted, the next token restarts at 1 and lease-fenced writes return `STALE` against newer stored epochs until the counter is restored above them.
+- The provider targets standalone Redis. Under Redis Cluster the lease key, its counter, and a fenced record would need one hash slot.
 - Generic `queries()` operations can address any key, including lease and record keys, and would bypass their token and fence checks. Keep lease and record key families separate from generic string keys.
 - `RedisVersionedRecord.payload` is opaque to this module. Schema drift is the domain owner's risk.
 - The module has no module-local `.tavallci/ci.yaml` in this repository yet, so CI ownership is not declared at module level.
