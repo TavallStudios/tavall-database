@@ -11,6 +11,7 @@ import redis.clients.jedis.JedisPooled;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RedisDatabaseSmokeTest {
@@ -51,7 +52,8 @@ class RedisDatabaseSmokeTest {
                     "Remote Redis database is not reachable."
             );
 
-            client = database.connections().openClient().orElseThrow();
+            IJedisRedisDatabase jedisDatabase = assertInstanceOf(IJedisRedisDatabase.class, database);
+            client = jedisDatabase.connections().openClient().orElseThrow();
             String key = config.key();
             String value = config.value();
 
@@ -62,10 +64,10 @@ class RedisDatabaseSmokeTest {
             assertEquals(value, client.get(key));
             assertEquals(1L, client.del(key));
 
-            database.connections().closeClient(client);
+            jedisDatabase.connections().closeClient(client);
             assertTrue(database.isAvailable());
 
-            JedisPooled reopenedClient = database.connections().openClient().orElseThrow();
+            JedisPooled reopenedClient = jedisDatabase.connections().openClient().orElseThrow();
             String reopenedValue = value + "-reopened";
             assertEquals("OK", reopenedClient.set(key, reopenedValue));
             assertEquals(reopenedValue, reopenedClient.get(key));

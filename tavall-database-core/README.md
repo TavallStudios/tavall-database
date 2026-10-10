@@ -18,6 +18,7 @@ tavall-database/
 ├── [`tavall-database-core-contracts`](../tavall-database-core-contracts/README.md)
 ├── [`tavall-database-postgres`](../tavall-database-postgres/README.md)
 ├── [`tavall-database-mongo`](../tavall-database-mongo/README.md)
+├── [`tavall-database-redis-api`](../tavall-database-redis-api/README.md)
 ├── [`tavall-database-redis`](../tavall-database-redis/README.md)
 ├── [`tavall-database-qdrant`](../tavall-database-qdrant/README.md)
 ├── **[`tavall-database-core`](README.md) ← This Module**
@@ -30,7 +31,8 @@ tavall-database/
 | [`tavall-database-core-contracts`](../tavall-database-core-contracts/README.md) | Contributes contracts or a provider to the aggregate module. |
 | [`tavall-database-postgres`](../tavall-database-postgres/README.md) | Contributes contracts or a provider to the aggregate module. |
 | [`tavall-database-mongo`](../tavall-database-mongo/README.md) | Contributes contracts or a provider to the aggregate module. |
-| [`tavall-database-redis`](../tavall-database-redis/README.md) | Contributes contracts or a provider to the aggregate module. |
+| [`tavall-database-redis-api`](../tavall-database-redis-api/README.md) | Contributes the client-free Redis contracts to the aggregate module. |
+| [`tavall-database-redis`](../tavall-database-redis/README.md) | Contributes the Jedis Redis provider to the aggregate module. |
 | [`tavall-database-qdrant`](../tavall-database-qdrant/README.md) | Contributes contracts or a provider to the aggregate module. |
 
 ## Documentation

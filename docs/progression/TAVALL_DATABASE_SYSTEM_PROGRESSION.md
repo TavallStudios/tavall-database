@@ -7,11 +7,11 @@
 > **Owns:** Cross-module contract/provider architecture, consumer assembly, verification state, and system history  
 > **Does Not Own:** Individual module implementation detail, remote database operations, or facts not evidenced in GitHub  
 > **Audited Against:** `TavallStudios/tavall-database@ec7672bc435872c999e6955c34ca90dab35bc9c4`  
-> **Last Reconciled:** `2026-09-27 5:59 PM PDT`
+> **Last Reconciled:** `2026-10-09 2:13 PM PDT`
 
 ## About
 
-Tavall Database is a seven-project Gradle system with shared database contracts, four provider implementations, an aggregate consumer module, and a cross-provider test suite. No independently hosted database runtime is defined by these modules; consuming applications choose and configure providers.
+Tavall Database is an eight-project Gradle system with shared database contracts, a client-free Redis API, four provider implementations, an aggregate consumer module, and a cross-provider test suite. No independently hosted database runtime is defined by these modules; consuming applications choose and configure providers.
 
 This record tracks system boundaries and aggregate verification. See each module Progression for its source history and module test evidence.
 
@@ -30,7 +30,7 @@ This record tracks system boundaries and aggregate verification. See each module
 
 | Area | State |
 | --- | --- |
-| Module boundaries | Seven independent Gradle subprojects are documented below; the root build is an aggregator. |
+| Module boundaries | Eight independent Gradle subprojects are documented below; the root build is an aggregator. |
 | Implementation | 82 production Java source files are tracked across the provider, contracts, and aggregate modules. |
 | Verification | 20 files are tracked under `src/test`; remote database configurations are present, but no Gradle test or database service was run in this documentation pass. |
 | CI ownership | No module-local `.tavallci/ci.yaml` was found in the audited main tree. |
@@ -45,7 +45,8 @@ This record tracks system boundaries and aggregate verification. See each module
 | [`tavall-database-core`](../../tavall-database-core/README.md) | `LIBRARY` | None | Aggregate dependency surface for consumers | [Progression](TAVALL_DATABASE_CORE_PROGRESSION.md) |
 | [`tavall-database-postgres`](../../tavall-database-postgres/README.md) | `PROVIDER` | None | PostgreSQL and JPA provider | [Progression](TAVALL_DATABASE_POSTGRES_PROGRESSION.md) |
 | [`tavall-database-mongo`](../../tavall-database-mongo/README.md) | `PROVIDER` | None | MongoDB provider | [Progression](TAVALL_DATABASE_MONGO_PROGRESSION.md) |
-| [`tavall-database-redis`](../../tavall-database-redis/README.md) | `PROVIDER` | None | Redis provider | [Progression](TAVALL_DATABASE_REDIS_PROGRESSION.md) |
+| [`tavall-database-redis-api`](../../tavall-database-redis-api/README.md) | `API` | Owning consumer runtime | Client-free Redis contracts, leases, fenced records, provider SPI | [Progression](TAVALL_DATABASE_REDIS_API_PROGRESSION.md) |
+| [`tavall-database-redis`](../../tavall-database-redis/README.md) | `FEATURE` (secondary `PROVIDER`) | None | Jedis-backed Redis provider | [Progression](TAVALL_DATABASE_REDIS_PROGRESSION.md) |
 | [`tavall-database-qdrant`](../../tavall-database-qdrant/README.md) | `PROVIDER` | None | Qdrant provider | [Progression](TAVALL_DATABASE_QDRANT_PROGRESSION.md) |
 | [`tavall-database-test-suite`](../../tavall-database-test-suite/README.md) | `TEST_SUITE` | None | Cross-provider tests and remote-service smoke configurations | [Progression](TAVALL_DATABASE_TEST_SUITE_PROGRESSION.md) |
 
@@ -54,9 +55,10 @@ This record tracks system boundaries and aggregate verification. See each module
 | Boundary | Relationship | Evidence / state |
 | --- | --- | --- |
 | Contracts | Depends on Tavall Logging. | Declared in the root build; dependency resolution was not run. |
-| Core aggregate | Depends on contracts and all four provider modules. | Dependency assembly was not built or tested in this audit. |
+| Core aggregate | Depends on contracts, the Redis API, and all four provider modules. | Dependency assembly was not built or tested in this audit; the Redis edges were built and tested locally per `98b9312`. |
+| Redis API | Depends only on `core-contracts`; `verifyClientFreeApi` fails `check` if a concrete Redis client reaches its compile classpath. | Validated locally; open [PR #30](https://github.com/TavallStudios/tavall-database/pull/30); not published. |
 | PostgreSQL provider | PostgreSQL, Jakarta Persistence, and Hibernate boundaries; H2/JUnit test dependencies. | No database or test execution was performed. |
-| MongoDB, Redis, Qdrant providers | Depend on their vendor client libraries and the shared contracts. | Remote service behavior is not verified; Redis TLS support is present in source history. |
+| MongoDB, Redis, Qdrant providers | MongoDB and Qdrant depend on vendor client libraries and the shared contracts. The Redis provider depends on the Redis API and Jedis. | Remote service behavior is not verified; Redis TLS support is present in source history. |
 | Test suite | Aggregates core/providers and tracks remote database test configurations. | 11 test source files are in the test-suite module; service-backed tests were not run. |
 
 ## Progression Timeline
@@ -74,6 +76,7 @@ This record tracks system boundaries and aggregate verification. See each module
 | 2026-09-22 3:52 AM PDT | `IN_PROGRESS` | Required explicit JPA entity package configuration. | [`eb8d2e465e07`](https://github.com/TavallStudios/tavall-database/commit/eb8d2e465e0715abb29e15f840d228e9bb1cbdeb) | Entity discovery now requires an explicit package boundary; regression tests were not run in this rollout. |
 | 2026-09-22 5:15 AM PDT | `IN_PROGRESS` | Added a trusted PostgreSQL statement boundary. | [`ac40359d734f`](https://github.com/TavallStudios/tavall-database/commit/ac40359d734f18474fd444881d0b20e6b862374e) | SQL trust boundary changed in source history; no database acceptance is implied. |
 | 2026-09-22 6:26 AM PDT | `IN_PROGRESS` | Avoided invalid Hibernate JNDI registration. | [`05bf86389119`](https://github.com/TavallStudios/tavall-database/commit/05bf86389119982511cfeb2b924d12f08faa0f8b) | Hibernate registration behavior changed; runtime/database verification remains outstanding. |
+| `2026-10-09 2:13 PM PDT` | `VALIDATED` | Split Redis into a client-free API module and a Jedis provider module. The API owns the Redis contracts, typed leases and fenced records, and the provider SPI; the provider supplies the Jedis implementation and the `IJedis*` compatibility boundary. | [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`; affected: `tavall-database-redis-api`, `tavall-database-redis`, `tavall-database-core`, `tavall-database-test-suite` | Validated locally per the commit: `check` passed and `RedisDatabaseContractTest` passed 8/8. Local only: not pushed, not published to GitHub Packages, and no consumer has migrated; Tavall Cloud and Tavall MC remain on raw-Jedis 1.0.0 usage. |
 
 ## Validation State
 
@@ -110,5 +113,6 @@ Add the module CI definitions, run each provider's appropriate tests and remote-
 | Timestamp | Surface | Event | Location | Previous Location | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-09-27 5:59 PM PDT | GitHub | `CREATED` | `docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | — | PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. | Created system Progression from current module, build, and source-history evidence. |
+| 2026-10-09 2:13 PM PDT | GitHub | `UPDATED` | `docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | Same path | Commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009` | Added the Redis API module, the Redis provider role, the eight-project count, and the 2026-10-09 system timeline entry. |
 
 </details>
