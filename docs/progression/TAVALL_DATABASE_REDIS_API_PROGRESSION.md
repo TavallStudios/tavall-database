@@ -58,7 +58,7 @@ For an API module, progression measures contract implementation, exposed operati
 | --- | --- | --- | --- |
 | Architecture | Passed locally | `verifyClientFreeApi` in `check`; `CanonicalArchitectureTest` 1/1 (per commit `98b9312`) | Run in module CI once defined |
 | Client-free API | Passed locally | `publicApiExposesNoConcreteClientTypes` in `RedisDatabaseContractTest` | Keep enforced on future API changes |
-| Contract (Testcontainers) | Passed locally | `RedisDatabaseContractTest` 9/9 against `redis:8-alpine`: provider selection, expiry, concurrent `setIfAbsent`, lease isolation after expiry, fenced CAS stale/missing/epoch, concurrent CAS, lease fencing tokens with a stale holder rejected, reconnect recovery, closed-handler failure | Re-run in CI; remote services not exercised |
+| Contract (Testcontainers) | Passed locally | `RedisDatabaseContractTest` 11/11 against `redis:8-alpine`: lease-fenced writes (expired holder with and without a next holder, epoch guard), provider selection, expiry, concurrent `setIfAbsent`, lease isolation after expiry, fenced CAS stale/missing/epoch, concurrent CAS, lease fencing tokens with a stale holder rejected, reconnect recovery, closed-handler failure | Re-run in CI; remote services not exercised |
 | Unit | Not separately recorded | No module-local test sources | Add only if API-level behavior needs direct coverage |
 | Consumer / Runtime | Not verified | No consumer has migrated | Migrate Tavall Cloud and Tavall MC; record acceptance |
 | End-to-End | Not established | No deployed runtime | Record in owning runtime progression when adopted |

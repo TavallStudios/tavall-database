@@ -65,16 +65,17 @@ tavall-database/
 - `acquire` is an atomic set-if-absent with expiry. It returns empty when another acquisition holds the key.
 - Every acquisition returns a `RedisLease` with a unique token. A holder whose lease expired and was re-acquired, including by the same owner, cannot renew or release it.
 - `renew` and `release` return `RedisLeaseState.HELD` when applied and `LOST` when nothing changed.
-- A lease is coordination, not durable authority. Durable writes still require the domain owner's fence.
+- A lease is coordination, not durable authority. Writers it coordinates use the lease-fenced record methods below, which check the lease inside Redis.
 
 ### Fenced records
 - A record carries `version` (starting at 1), `fenceEpoch` (writer authority, for example a lease generation), and an opaque `payload`.
 - `compareAndSet(key, expected, next)` applies only when the stored version and fence epoch equal `expected`.
 - `next` must advance the version and must not lower the fence epoch. Violations are rejected before Redis is contacted.
+- `createUnderLease(key, version, payload, lease)` and `compareAndSetUnderLease(key, expected, nextVersion, payload, lease)` additionally require, inside the same script, that this exact lease acquisition still holds its key and that the stored epoch is not newer than `lease.fencingToken()`; the record is stamped with that token. A lost lease or older token yields `STALE`. Plain `create` / `compareAndSet` do not consult a lease.
 - Outcomes:
   - `APPLIED`: the write was applied; `current` holds the new record.
   - `EXISTS`: `create` found a record; the existing record is returned unchanged.
-  - `STALE`: the stored version or fence epoch did not match the caller's fence.
+  - `STALE`: the stored version or fence epoch did not match the caller's fence, or (lease-fenced methods) the lease is no longer held or its token is older than the stored epoch.
   - `MISSING`: `compareAndSet` or `delete` targeted a record that does not exist.
 - Each operation runs as one server-side script, so concurrent writers serialize and stale writers do not partially apply.
 
@@ -96,7 +97,7 @@ The loader fails fast when zero or several providers are present. Exactly one pr
 
 ## Integration Example
 
-A domain handler declares its Redis collaborator through `DependencyAccess<IRedisDatabase>`. It acquires a lease for mutual exclusion and then writes through a fenced compare-and-set. The domain owns the key names, payload, and version/epoch policy. Imports are omitted. With a single managed dependency, Tavall DI's `getInstance()` returns the typed contract directly; the consuming runtime registers the built `IRedisDatabase` in its generation-owned dependency map.
+A domain handler declares its Redis collaborator through `DependencyAccess<IRedisDatabase>`. It acquires a lease for mutual exclusion and then writes through a lease-fenced compare-and-set (`compareAndSetUnderLease`). The domain owns the key names, payload, and version/epoch policy. Imports are omitted. With a single managed dependency, Tavall DI's `getInstance()` returns the typed contract directly; the consuming runtime registers the built `IRedisDatabase` in its generation-owned dependency map.
 
 ```java
 @DelegatesTo(ICampaignStateHandler.class)
@@ -156,9 +157,9 @@ Removal condition for the `IJedis*` compatibility types: remove them once Tavall
 
 ## Tests and Evidence
 
-Evidence is taken from commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`. The results below were first recorded in that commit message. After the PR #30 reviews, `RedisDatabaseContractTest` has 10 tests and passes 10/10 against `redis:8-alpine`. The former "restart recovery" test is named reconnect recovery, because it reopens the provider against the same running Redis.
+Evidence is taken from commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`. The results below were first recorded in that commit message. After the PR #30 reviews, `RedisDatabaseContractTest` has 11 tests and passes 11/11 against `redis:8-alpine`. The former "restart recovery" test is named reconnect recovery, because it reopens the provider against the same running Redis.
 
-Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, run against a real `redis:8-alpine` container through Testcontainers (10 tests):
+Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, run against a real `redis:8-alpine` container through Testcontainers (11 tests):
 
 - `providerLoaderSelectsTheSingleRuntimeProvider`
 - `publicApiExposesNoConcreteClientTypes`
@@ -170,6 +171,7 @@ Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, 
 - `stateSurvivesProviderReconnectAndClosedHandlersFailFast`
 - `leaseFencingTokensIncreaseAndStaleHoldersCannotOverwriteNewerRecords`
 - `leaseFencedWritesRejectAnExpiredHolderBeforeAndAfterTheNextHolderWrites`
+- `leaseFencedWritesNeverLowerTheStoredEpoch`
 
 Other recorded evidence: `./gradlew --write-locks clean check` succeeded; `CanonicalArchitectureTest` 1/1 and `DatabaseBuilderTypingTest` 5/5 passed; remote smoke tests were skipped because remote database environment variables are not configured.
 
