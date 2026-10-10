@@ -161,11 +161,14 @@ class RedisDatabaseContractTest {
         RedisKey leaseKey = RedisKey.of("tavall-database-test", "lease", "server-fenced");
         RedisKey recordKey = RedisKey.of("tavall-database-test", "record", "server-fenced");
 
-        RedisLease paused = leases.acquire(leaseKey, "writer-a", Duration.ofMillis(150)).orElseThrow();
+        RedisLease paused = leases.acquire(leaseKey, "writer-a", Duration.ofMillis(500)).orElseThrow();
         assertTrue(records.createUnderLease(recordKey, 1, "a-1", paused).applied());
         RedisVersionedRecord afterCreate = records.read(recordKey).orElseThrow();
         assertEquals(paused.fencingToken(), afterCreate.fenceEpoch());
-        Thread.sleep(300);
+        Thread.sleep(800);
+        // Expired with no next holder yet.
+        assertEquals(RedisRecordWriteState.STALE,
+                records.compareAndSetUnderLease(recordKey, afterCreate.fence(), 2, "a-expired", paused).state());
         RedisLease current = leases.acquire(leaseKey, "writer-b", Duration.ofSeconds(5)).orElseThrow();
 
         // S1: the expired holder writes before the new holder has written anything.
@@ -181,9 +184,25 @@ class RedisDatabaseContractTest {
         RedisVersionedRecord seen = records.read(recordKey).orElseThrow();
         assertEquals(RedisRecordWriteState.STALE,
                 records.compareAndSetUnderLease(recordKey, seen.fence(), 3, "a-3", paused).state());
-        assertEquals(RedisRecordWriteState.STALE,
-                records.createUnderLease(RedisKey.of("tavall-database-test", "record", "other"), 1, "a", paused).state());
+        RedisKey otherKey = RedisKey.of("tavall-database-test", "record", "other");
+        assertEquals(RedisRecordWriteState.STALE, records.createUnderLease(otherKey, 1, "a", paused).state());
+        assertTrue(records.read(otherKey).isEmpty());
         assertEquals("b-2", records.read(recordKey).orElseThrow().payload());
+    }
+
+    @Test
+    void leaseFencedWritesNeverLowerTheStoredEpoch() {
+        RedisKey leaseKey = RedisKey.of("tavall-database-test", "lease", "epoch-guard");
+        RedisKey recordKey = RedisKey.of("tavall-database-test", "record", "epoch-guard");
+        RedisVersionedRecord newer = new RedisVersionedRecord(1, 1_000, "written-under-a-later-epoch");
+        database.records().create(recordKey, newer);
+        RedisLease lease = database.leases().acquire(leaseKey, "writer", Duration.ofSeconds(5)).orElseThrow();
+
+        RedisRecordWriteResult result = database.records()
+                .compareAndSetUnderLease(recordKey, newer.fence(), 2, "lower-token", lease);
+
+        assertEquals(RedisRecordWriteState.STALE, result.state());
+        assertEquals(Optional.of(newer), result.current());
     }
 
     @Test
