@@ -15,9 +15,10 @@ public final class RedisProviderCalls {
     public static <T> T call(Supplier<T> operation) {
         try {
             return operation.get();
-        } catch (JedisConnectionException exception) {
+        } catch (JedisConnectionException | IllegalStateException exception) {
+            // IllegalStateException is how the pool reports use after close; both are connection failures.
             throw new RedisConnectionException("Redis connection failed.", exception);
-        } catch (JedisException | IllegalStateException exception) {
+        } catch (JedisException exception) {
             throw new RedisQueryException("Redis operation failed: " + exception.getMessage(), exception);
         }
     }

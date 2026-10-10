@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.tavall.database.redis.connection.IJedisRedisConnectionHandler;
+import org.tavall.database.redis.exception.RedisQueryException;
 import org.tavall.database.redis.key.RedisKey;
 
 /**
@@ -33,7 +34,6 @@ public final class RedisLeaseHandler implements IRedisLeaseHandler {
             end
             return 0
             """;
-    private static final char SEPARATOR = '|';
 
     private final IJedisRedisConnectionHandler connectionHandler;
 
@@ -45,9 +45,11 @@ public final class RedisLeaseHandler implements IRedisLeaseHandler {
     public Optional<RedisLease> acquire(RedisKey key, String owner, Duration timeToLive) {
         RedisLease candidate = new RedisLease(key, owner, UUID.randomUUID().toString(), 1, timeToLive);
         Object reply = RedisProviderCalls.call(() -> connectionHandler.requireClient().eval(ACQUIRE_SCRIPT,
-                List.of(key.value(), fencingKey(key)),
-                List.of(storedValue(candidate), Long.toString(timeToLive.toMillis()))));
-        long fencingToken = reply instanceof Long value ? value : 0L;
+                List.of(key.value(), RedisLeaseEncoding.fencingKey(key)),
+                List.of(RedisLeaseEncoding.storedValue(candidate), Long.toString(timeToLive.toMillis()))));
+        if (!(reply instanceof Long fencingToken)) {
+            throw new RedisQueryException("Redis returned an unexpected lease acquisition reply: " + reply);
+        }
         return fencingToken > 0
                 ? Optional.of(new RedisLease(key, owner, candidate.token(), fencingToken, timeToLive))
                 : Optional.empty();
@@ -59,7 +61,7 @@ public final class RedisLeaseHandler implements IRedisLeaseHandler {
         long millis = new RedisLease(lease.key(), lease.owner(), lease.token(), lease.fencingToken(), timeToLive)
                 .timeToLive().toMillis();
         Object reply = RedisProviderCalls.call(() -> connectionHandler.requireClient().eval(RENEW_SCRIPT,
-                List.of(lease.key().value()), List.of(storedValue(lease), Long.toString(millis))));
+                List.of(lease.key().value()), List.of(RedisLeaseEncoding.storedValue(lease), Long.toString(millis))));
         return Long.valueOf(1L).equals(reply) ? RedisLeaseState.HELD : RedisLeaseState.LOST;
     }
 
@@ -67,7 +69,7 @@ public final class RedisLeaseHandler implements IRedisLeaseHandler {
     public RedisLeaseState release(RedisLease lease) {
         Objects.requireNonNull(lease, "lease");
         Object reply = RedisProviderCalls.call(() -> connectionHandler.requireClient().eval(RELEASE_SCRIPT,
-                List.of(lease.key().value()), List.of(storedValue(lease))));
+                List.of(lease.key().value()), List.of(RedisLeaseEncoding.storedValue(lease))));
         return Long.valueOf(1L).equals(reply) ? RedisLeaseState.HELD : RedisLeaseState.LOST;
     }
 
@@ -78,15 +80,9 @@ public final class RedisLeaseHandler implements IRedisLeaseHandler {
         if (stored == null) {
             return Optional.empty();
         }
-        int separator = stored.indexOf(SEPARATOR);
-        return separator < 0 ? Optional.empty() : Optional.of(stored.substring(separator + 1));
+        String owner = RedisLeaseEncoding.owner(stored);
+        return owner.isEmpty() ? Optional.empty() : Optional.of(owner);
     }
 
-    private static String fencingKey(RedisKey key) {
-        return key.value() + ":fencing-token";
-    }
 
-    private static String storedValue(RedisLease lease) {
-        return lease.token() + SEPARATOR + lease.owner();
-    }
 }

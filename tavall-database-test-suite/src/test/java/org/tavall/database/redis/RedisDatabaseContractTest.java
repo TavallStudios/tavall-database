@@ -155,6 +155,38 @@ class RedisDatabaseContractTest {
     }
 
     @Test
+    void leaseFencedWritesRejectAnExpiredHolderBeforeAndAfterTheNextHolderWrites() throws InterruptedException {
+        IRedisLeaseHandler leases = database.leases();
+        IRedisVersionedRecordHandler records = database.records();
+        RedisKey leaseKey = RedisKey.of("tavall-database-test", "lease", "server-fenced");
+        RedisKey recordKey = RedisKey.of("tavall-database-test", "record", "server-fenced");
+
+        RedisLease paused = leases.acquire(leaseKey, "writer-a", Duration.ofMillis(150)).orElseThrow();
+        assertTrue(records.createUnderLease(recordKey, 1, "a-1", paused).applied());
+        RedisVersionedRecord afterCreate = records.read(recordKey).orElseThrow();
+        assertEquals(paused.fencingToken(), afterCreate.fenceEpoch());
+        Thread.sleep(300);
+        RedisLease current = leases.acquire(leaseKey, "writer-b", Duration.ofSeconds(5)).orElseThrow();
+
+        // S1: the expired holder writes before the new holder has written anything.
+        RedisRecordWriteResult early = records.compareAndSetUnderLease(recordKey, afterCreate.fence(), 2, "a-2", paused);
+        assertEquals(RedisRecordWriteState.STALE, early.state());
+        assertEquals(Optional.of(afterCreate), early.current());
+
+        RedisRecordWriteResult written = records.compareAndSetUnderLease(recordKey, afterCreate.fence(), 2, "b-2", current);
+        assertTrue(written.applied());
+        assertEquals(current.fencingToken(), written.current().orElseThrow().fenceEpoch());
+
+        // S2: the expired holder re-reads the newer record and retries with its fence.
+        RedisVersionedRecord seen = records.read(recordKey).orElseThrow();
+        assertEquals(RedisRecordWriteState.STALE,
+                records.compareAndSetUnderLease(recordKey, seen.fence(), 3, "a-3", paused).state());
+        assertEquals(RedisRecordWriteState.STALE,
+                records.createUnderLease(RedisKey.of("tavall-database-test", "record", "other"), 1, "a", paused).state());
+        assertEquals("b-2", records.read(recordKey).orElseThrow().payload());
+    }
+
+    @Test
     void fencedRecordsRejectStaleAndMissingWrites() {
         IRedisVersionedRecordHandler records = database.records();
         RedisKey key = RedisKey.of("tavall-database-test", "record", "fenced");

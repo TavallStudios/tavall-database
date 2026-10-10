@@ -8,6 +8,8 @@ import java.util.Optional;
 import org.tavall.database.redis.connection.IJedisRedisConnectionHandler;
 import org.tavall.database.redis.exception.RedisQueryException;
 import org.tavall.database.redis.key.RedisKey;
+import org.tavall.database.redis.lease.RedisLease;
+import org.tavall.database.redis.lease.RedisLeaseEncoding;
 
 /**
  * Jedis fenced-record implementation over a hash with {@code version}, {@code fenceEpoch}, and
@@ -54,6 +56,35 @@ public final class RedisVersionedRecordHandler implements IRedisVersionedRecordH
                 return current('STALE')
             end
             redis.call('DEL', KEYS[1])
+            return current('APPLIED')
+            """;
+
+    // KEYS: record, lease key. ARGV: lease stored value, lease fencing token, next version, payload.
+    private static final String CREATE_UNDER_LEASE_SCRIPT = CURRENT + """
+            if redis.call('GET', KEYS[2]) ~= ARGV[1] then
+                return current('STALE')
+            end
+            if redis.call('EXISTS', KEYS[1]) == 1 then
+                return current('EXISTS')
+            end
+            redis.call('HSET', KEYS[1], 'version', ARGV[3], 'fenceEpoch', ARGV[2], 'payload', ARGV[4])
+            return current('APPLIED')
+            """;
+    // KEYS: record, lease key. ARGV: lease stored value, lease fencing token, expected version, expected epoch,
+    // next version, payload.
+    private static final String COMPARE_AND_SET_UNDER_LEASE_SCRIPT = CURRENT + """
+            if redis.call('GET', KEYS[2]) ~= ARGV[1] then
+                return current('STALE')
+            end
+            if redis.call('EXISTS', KEYS[1]) == 0 then
+                return current('MISSING')
+            end
+            local storedEpoch = redis.call('HGET', KEYS[1], 'fenceEpoch')
+            if redis.call('HGET', KEYS[1], 'version') ~= ARGV[3] or storedEpoch ~= ARGV[4]
+                    or tonumber(storedEpoch) > tonumber(ARGV[2]) then
+                return current('STALE')
+            end
+            redis.call('HSET', KEYS[1], 'version', ARGV[5], 'fenceEpoch', ARGV[2], 'payload', ARGV[6])
             return current('APPLIED')
             """;
 
@@ -106,6 +137,32 @@ public final class RedisVersionedRecordHandler implements IRedisVersionedRecordH
     }
 
     @Override
+    public RedisRecordWriteResult createUnderLease(RedisKey key, long version, String payload, RedisLease lease) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(lease, "lease");
+        RedisVersionedRecord initial = new RedisVersionedRecord(version, lease.fencingToken(), payload);
+        return eval(CREATE_UNDER_LEASE_SCRIPT, List.of(key.value(), lease.key().value()), List.of(
+                RedisLeaseEncoding.storedValue(lease), Long.toString(lease.fencingToken()),
+                Long.toString(initial.version()), initial.payload()), key);
+    }
+
+    @Override
+    public RedisRecordWriteResult compareAndSetUnderLease(RedisKey key, RedisRecordFence expected, long nextVersion,
+                                                          String payload, RedisLease lease) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(expected, "expected");
+        Objects.requireNonNull(lease, "lease");
+        RedisVersionedRecord next = new RedisVersionedRecord(nextVersion, lease.fencingToken(), payload);
+        if (next.version() <= expected.version()) {
+            throw new IllegalArgumentException("next version must advance beyond the expected version");
+        }
+        return eval(COMPARE_AND_SET_UNDER_LEASE_SCRIPT, List.of(key.value(), lease.key().value()), List.of(
+                RedisLeaseEncoding.storedValue(lease), Long.toString(lease.fencingToken()),
+                Long.toString(expected.version()), Long.toString(expected.fenceEpoch()),
+                Long.toString(next.version()), next.payload()), key);
+    }
+
+    @Override
     public RedisRecordWriteResult delete(RedisKey key, RedisRecordFence expected) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(expected, "expected");
@@ -114,18 +171,28 @@ public final class RedisVersionedRecordHandler implements IRedisVersionedRecordH
     }
 
     private RedisRecordWriteResult eval(String script, RedisKey key, List<String> arguments) {
-        Object reply = RedisProviderCalls.call(() -> connectionHandler.requireClient().eval(script, List.of(key.value()), arguments));
+        return eval(script, List.of(key.value()), arguments, key);
+    }
+
+    private RedisRecordWriteResult eval(String script, List<String> keys, List<String> arguments, RedisKey key) {
+        Object reply = RedisProviderCalls.call(() -> connectionHandler.requireClient().eval(script, keys, arguments));
         if (!(reply instanceof List<?> fields) || fields.size() != 4) {
             throw new RedisQueryException("Redis returned an unexpected fenced-record reply: " + reply);
         }
-        RedisRecordWriteState state = RedisRecordWriteState.valueOf(String.valueOf(fields.get(0)));
-        String version = String.valueOf(fields.get(1));
-        if (version.isEmpty()) {
-            return new RedisRecordWriteResult(state, Optional.empty());
-        }
         try {
+            RedisRecordWriteState state = RedisRecordWriteState.valueOf(String.valueOf(fields.get(0)));
+            String version = String.valueOf(fields.get(1));
+            if (version.isEmpty()) {
+                if (state != RedisRecordWriteState.MISSING && state != RedisRecordWriteState.STALE
+                        && !(state == RedisRecordWriteState.APPLIED && script.equals(DELETE_SCRIPT))) {
+                    throw new RedisQueryException("Redis key " + key.value() + " does not hold a versioned record.");
+                }
+                return new RedisRecordWriteResult(state, Optional.empty());
+            }
             return new RedisRecordWriteResult(state, Optional.of(new RedisVersionedRecord(Long.parseLong(version),
                     Long.parseLong(String.valueOf(fields.get(2))), String.valueOf(fields.get(3)))));
+        } catch (RedisQueryException exception) {
+            throw exception;
         } catch (RuntimeException exception) {
             throw new RedisQueryException("Redis key " + key.value() + " does not hold a versioned record.", exception);
         }
