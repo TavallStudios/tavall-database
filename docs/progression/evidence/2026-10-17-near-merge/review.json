@@ -1,0 +1,10 @@
+{
+  "authoring": "tjXJNOOBIE and Codex; advisory review is not owner approval.",
+  "baseSource": "7c768ca595447aa091da0724ef414b24bacc41bc",
+  "result": "Verified IPostgresEntityStore, operation context and entity-package builder on current main; source unchanged since local source inspected. Documentation-only; PostgreSQL runtime tests not applicable.",
+  "review": "Complete PR diff inspected; no unresolved correctness finding in reviewed scope. Independent human approval or Owner Self-Review remains required.",
+  "reviewType": "ADVISORY_AUTOMATED",
+  "rollback": "Revert the eventual merge through the existing GitHub PR workflow. No data migration or deployment in this change.",
+  "scope": "Entity-store consumer guide and README link.",
+  "testedSource": "37539c13b454e61f8046441856f0b77391909e09"
+}
