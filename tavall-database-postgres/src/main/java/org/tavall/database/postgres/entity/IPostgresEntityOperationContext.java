@@ -60,4 +60,17 @@ public interface IPostgresEntityOperationContext {
             String queryName,
             Map<String, ?> parameters
     );
+
+    /**
+     * Acquires a PostgreSQL advisory lock held until the enclosing atomic
+     * operation commits or rolls back.
+     *
+     * <p>The key is bound as data and hashed by PostgreSQL. The caller must
+     * invoke this through the active context supplied to
+     * {@link IPostgresEntityStore#executeAtomic(IPostgresEntityAtomicOperation)}.
+     * Multiple keys should be acquired in a stable, sorted order.</p>
+     *
+     * @param lockKey stable, non-blank lock identity
+     */
+    void acquireAdvisoryTransactionLock(String lockKey);
 }

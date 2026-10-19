@@ -7,8 +7,8 @@
 > **Owning System:** `Tavall Database`  
 > **Owns:** Audited implementation, integration, validation, and historical progression for `tavall-database-postgres`  
 > **Does Not Own:** Aggregate system progression, deployment history, product/design rules, or Git workflow policy  
-> **Audited Against:** `TavallStudios/tavall-database@ec7672bc435872c999e6955c34ca90dab35bc9c4`  
-> **Last Reconciled:** `2026-09-27 5:59 PM PDT`
+> **Audited Against:** current main `bdc67789723462ba435c5953035a6b632e8c44bc` plus merge-synced PR #29 commit `882838f7526703c62db8cb9de819bea33cc9e5de` and Tavall-MC consumer PR #333
+> **Last Reconciled:** `2026-10-19 2:51 PM PDT`
 
 ## About
 
@@ -26,23 +26,23 @@ This record measures the module’s implementation maturity, API/integration sta
 | Owning System | `Tavall Database` |
 | System Progression | [Tavall Database System Progression](TAVALL_DATABASE_SYSTEM_PROGRESSION.md) |
 | Runtime Owner | `None` |
-| Primary Consumers | Callers select this library/module; no runtime consumer acceptance was established in this module-focused audit. |
-| Current Branch / PR Stack | [CI transition #17](https://github.com/TavallStudios/tavall-database/pull/17); documentation update: [PR #26](https://github.com/TavallStudios/tavall-database/pull/26). |
-| Audited Revision | [`ec7672bc435872c999e6955c34ca90dab35bc9c4`](https://github.com/TavallStudios/tavall-database/commit/ec7672bc435872c999e6955c34ca90dab35bc9c4) on `main` |
+| Primary Consumers | Tavall-MC account-link completion is the first candidate consumer; exact-source and package-backed acceptance are pending. |
+| Current Branch / PR Stack | Advisory-lock API was carried by PR #29; CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17) is a separate staging path. PRs #27 and #30 are merged. |
+| Audited Revision | Main base `bdc67789723462ba435c5953035a6b632e8c44bc` plus merge commit `882838f7526703c62db8cb9de819bea33cc9e5de`. |
 
 ## Current Status
 
 | Field | State |
 | --- | --- |
-| Overall State | `PARTIAL` |
-| Current Phase | Implementation source is present; compatibility and consumer acceptance remain unverified. |
-| Implementation | 23 tracked production Java source files; responsibility boundary is present in Gradle settings/root build configuration |
-| Integration | Declared dependency graph and README relationships reviewed; consumer acceptance not verified |
-| Validation | Source/build/test tree audited through GitHub; Gradle commands were not run in this docs-only pass |
-| Runtime / Consumer Acceptance | No runtime owner assigned; consumer acceptance not established |
-| Deployment Verification | `N/A` for this non-runtime module |
-| Primary Blocker | Module-local `.tavallci/ci.yaml` is absent in the audited `main` tree; 7 test source files are tracked but no execution result was retrieved |
-| Next Slice | Add the required module CI definition and obtain test/consumer evidence appropriate to this module type |
+| Overall State | PARTIAL |
+| Current Phase | The main-synchronized PR #29 candidate contains the typed advisory-lock operation at merge commit `882838f7526703c62db8cb9de819bea33cc9e5de`; the provider check passes locally. Immutable artifact publication and PostgreSQL service acceptance remain open. |
+| Implementation | PostgreSQL entity persistence and the advisory-lock operation remain inside the existing provider boundary; no runtime was added. |
+| Integration | Tavall-MC PR #333 is the first source-composed consumer; runtime/package acceptance remains separate. |
+| Validation | :tavall-database-postgres:check --rerun-tasks passed on the current merge candidate: 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because TAVALL_TEST_POSTGRES_JDBC_URL is unset. |
+| Runtime / Consumer Acceptance | Runtime owner is None; no package-backed or live PostgreSQL acceptance is claimed. |
+| Deployment Verification | N/A for this non-runtime module. |
+| Remaining Acceptance | PostgreSQL contention/rollback, immutable artifact publication, exact-head Bot checks, and package-backed MC consumer acceptance remain unverified. |
+| Next Slice | Revalidate the final pushed PR #29 head, refresh Tavall Bot evidence, and complete the authorized merge; package publication and PostgreSQL service acceptance follow through their owning paths. |
 
 ## Progression Timeline
 
@@ -53,44 +53,45 @@ This record measures the module’s implementation maturity, API/integration sta
 | 2026-09-22 3:52 AM PDT | `IN_PROGRESS` | fix: require explicit JPA entity packages | [eb8d2e465e07](https://github.com/TavallStudios/tavall-database/commit/eb8d2e465e0715abb29e15f840d228e9bb1cbdeb) | Current main has 23 production source source files, 7 `src/test` files, and 0 `src/integrationTest` files; no execution result is implied. |
 | 2026-09-22 5:15 AM PDT | `IN_PROGRESS` | feat: add trusted PostgreSQL statement boundary | [ac40359d734f](https://github.com/TavallStudios/tavall-database/commit/ac40359d734f18474fd444881d0b20e6b862374e) | Current main has 23 production source source files, 7 `src/test` files, and 0 `src/integrationTest` files; no execution result is implied. |
 | 2026-09-22 6:26 AM PDT | `IN_PROGRESS` | Avoid invalid Hibernate JNDI registration | [05bf86389119](https://github.com/TavallStudios/tavall-database/commit/05bf86389119982511cfeb2b924d12f08faa0f8b) | Current main has 23 production source source files, 7 `src/test` files, and 0 `src/integrationTest` files; no execution result is implied. |
+| 2026-10-04 UTC | `IN_PROGRESS` | Design typed PostgreSQL advisory transaction locks | [Technical Design](../technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md) | Existing atomic context remains the owner; the design commit itself is not provider or consumer validation. |
+| 2026-10-04 UTC | `IN_PROGRESS` | Add the typed transaction-scoped advisory lock operation | [`0685f72`](https://github.com/TavallStudios/tavall-database/commit/0685f72) | `:tavall-database-postgres:check` passed locally; 12 tests passed and five PostgreSQL-service integration cases were skipped because no test JDBC URL was supplied. |
+| 2026-10-04 UTC | `IN_PROGRESS` | Consume the lock through Tavall-MC account-link completion | [Tavall-MC PR #333](https://github.com/TavallStudios/tavall-mc/pull/333) | Focused MC account-link tests and `:novus-backend:check` passed on the exact-source candidate; three existing PostgreSQL/Redis-gated backend tests were skipped. PostgreSQL lock-contention acceptance remains unrun. |
+
+| 2026-10-19 2:34 PM PDT | IN_PROGRESS | Reconciled PR #29 with current main and reran the provider module check. | Current main bdc6778 plus the PR #29 advisory-lock source, synchronized by merge commit 882838f | 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because no test JDBC URL is configured. |
+
 
 ## Validation State
 
 | Validation | State | Evidence | Remaining Work |
 | --- | --- | --- | --- |
-| Architecture / module boundary | Audited | `settings.gradle.kts`, root `build.gradle.kts`, source tree, module README at `ec7672bc4358` | Reconcile future changes against module ownership |
-| Unit | 7 tracked test source files; no test run result was retrieved. | Current source tree at [`ec7672bc4358`](https://github.com/TavallStudios/tavall-database/tree/ec7672bc435872c999e6955c34ca90dab35bc9c4/tavall-database-postgres) | Run the applicable Gradle test task |
-| Integration | No module-local `src/integrationTest` sources were found; provider/runtime integration acceptance was not tested. | [Module tree](https://github.com/TavallStudios/tavall-database/tree/ec7672bc435872c999e6955c34ca90dab35bc9c4/tavall-database-postgres) and build configuration | Run the declared integration/provider test boundary where applicable; record prerequisites |
-| Consumer / Runtime | Not verified | Runtime classification in [`tavall-database-postgres/README.md`](../../tavall-database-postgres/README.md) | Verify through the named runtime/consumer where applicable |
-| End-to-End | N/A or not established | Current module/runtime documentation; no execution evidence | Record acceptance in the owning system Progression |
+| Architecture / module boundary | Audited | Current main bdc6778, root settings/build, module map and provider README. | Reconcile future changes against module ownership. |
+| Unit | Provider module check passed locally | Main-synchronized PR #29 candidate: :tavall-database-postgres:check --rerun-tasks; 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped cases require PostgreSQL service. The local-only init script resolved Tavall Logging from the existing private snapshot path. | Revalidate on the final pushed head and record the exact Tavall Bot result if emitted. |
+| PostgreSQL integration | Not run | TAVALL_TEST_POSTGRES_JDBC_URL is unset; no PostgreSQL service was contacted. | Run against an explicitly disposable database. |
+| Consumer source composition | Partial | Tavall-MC PR #333 consumes acquireAdvisoryTransactionLock in one atomic operation; earlier focused source-composition tests are branch-bound evidence. | Rerun the exact producer/consumer source pair. |
+| Consumer package resolution | Not run | No immutable artifact from the current provider source was selected. | Publish/select an immutable artifact through Tavall CI and validate without source composition. |
+| Consumer runtime | Not run | No Paper/Velocity runtime was started. | Run after package and database acceptance. |
+| End-to-End | Not established | No service-backed consumer execution is recorded. | Record acceptance in the owning system Progression. |
 
-## Dependencies and Integration
+### Advisory transaction-lock slice
 
-| Dependency / Consumer | Relationship | State | Evidence |
+| Validation | State | Evidence | Remaining Work |
 | --- | --- | --- | --- |
-| Root build and module source | Independent Gradle subproject | 23 tracked production Java source files; 7 files under `src/test`; no `src/integrationTest` files | [`settings.gradle.kts`](https://github.com/TavallStudios/tavall-database/blob/ec7672bc435872c999e6955c34ca90dab35bc9c4/settings.gradle.kts), [module tree](https://github.com/TavallStudios/tavall-database/tree/ec7672bc435872c999e6955c34ca90dab35bc9c4/tavall-database-postgres) |
-| Module dependencies | API dependencies on `core-contracts`, PostgreSQL, and Jakarta Persistence; Hibernate is compile-only/runtime; tests use JUnit and H2. | Declared in the root Gradle build; dependency resolution was not run | [`build.gradle.kts`](https://github.com/TavallStudios/tavall-database/blob/ec7672bc435872c999e6955c34ca90dab35bc9c4/build.gradle.kts) |
-| Runtime / primary consumer | None | No consumer acceptance verified | [Module README](../../tavall-database-postgres/README.md) |
+| Provider module check | Passed locally on the main-synchronized candidate | :tavall-database-postgres:check --rerun-tasks: 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because TAVALL_TEST_POSTGRES_JDBC_URL is unset. Java 25 / Gradle 9.6.1; local-only init script adds the existing private snapshot repository for Tavall Logging. | Repeat on the pushed PR head and retain the actual Bot result if emitted. |
+| PostgreSQL contention/rollback | Not run | The gated tests were skipped; no PostgreSQL service was contacted. | Run against an explicitly disposable test database. |
+| Tavall-MC source consumer | Passed on the prior exact-source candidate | PR #333 used the advisory lock within one atomic operation; focused AccountLink tests and :novus-backend:check passed, with three PostgreSQL/Redis-gated tests skipped. | Rerun against the current exact producer/consumer pair. |
+| Package-backed consumer | Not run | No immutable provider artifact is available for selection. | Publish/select via Tavall CI and validate separately from source composition. |
 
-## Blockers
+## Acceptance Still Open
 
-| Blocker | Impact | Resolution |
+| Acceptance | Impact | Next action |
 | --- | --- | --- |
-| Module-local `.tavallci/ci.yaml` is absent from audited main | Required per-module CI ownership is not represented on main | Add the module definition through a separate CI-scoped PR |
-| Test sources are tracked but unexecuted | Passing behavior, provider compatibility, and operational acceptance cannot be claimed from file presence | Run configured Gradle checks and record their result; add missing scenarios if required |
+| PostgreSQL integration | Advisory lock contention and rollback/release are not proven against PostgreSQL. | Run the gated tests on an explicitly disposable service. |
+| Immutable artifact and package consumer | Source composition does not demonstrate the published provider artifact. | Publish/select through Tavall CI and validate the MC package consumer. |
+| Exact-head Bot evidence | No Tavall Bot status has been emitted at the current PR head. | Push the reconciled source head and record the exact Bot outcome. |
 
 ## Next Slice
 
-Add `.tavallci/ci.yaml` for `tavall-database-postgres` in a separate CI-scoped change, run the applicable build/test tasks, and verify the declared dependency/consumer edge. 
-
-## Related Documentation
-
-| Type | Document |
-| --- | --- |
-| Module README | [`README.md`](../../tavall-database-postgres/README.md) |
-| Owning system Progression | [`TAVALL_DATABASE_SYSTEM_PROGRESSION.md`](./TAVALL_DATABASE_SYSTEM_PROGRESSION.md) |
-| Build / source | [Root build](../../build.gradle.kts), [module source](../../tavall-database-postgres/src) |
-| Deployment | `N/A` — this module is not independently deployed |
+Revalidate the final pushed PR #29 head, refresh Tavall Bot evidence, and complete the authorized merge. Then prove PostgreSQL contention/rollback and immutable package-backed MC consumption through the owning CI path.
 
 ## Documentation Update State
 
@@ -101,8 +102,8 @@ Add `.tavallci/ci.yaml` for `tavall-database-postgres` in a separate CI-scoped c
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | 2026-09-27 5:59 PM PDT | Documentation branch `working/canonical-readme-module-docs-2026-09-27`, PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main baseline `ec7672bc435872c999e6955c34ca90dab35bc9c4`. |
-| Notion | `TEMPORARY_DRIFT` | Required twin not inspected | 2026-09-27 5:59 PM PDT | User-directed GitHub-only scope; synchronization remains pending. |
+| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | 2026-10-19 2:51 PM PDT | PR #29 main-synchronized provider check: 17 total tests, 12 passed, 5 skipped. |
+| Notion | SYNCED | [tavall-database-postgres — PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db) | 2026-10-19 2:51 PM PDT | Refreshed from GitHub source; post-update fetch verified the current main revision, PR candidate, and provider-check evidence. |
 
 ### Update History
 
@@ -110,4 +111,6 @@ Add `.tavallci/ci.yaml` for `tavall-database-postgres` in a separate CI-scoped c
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-09-27 5:59 PM PDT | GitHub | `CREATED` | `docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | — | PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4` | Created module Progression from the current main source/build/history and module README. |
 
+| 2026-10-19 2:34 PM PDT | GitHub | UPDATED | docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | Same path | PR #29 main synchronization and local provider check | Recorded 17 total tests, 12 passed, five PostgreSQL-service tests skipped; no live PostgreSQL or package acceptance is claimed. |
+| 2026-10-19 2:51 PM PDT | Notion | UPDATED | https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db | Same page | Post-update fetch after refreshing from GitHub source. | Verified the current main revision, candidate check result, and PostgreSQL-service skips. |
 </details>

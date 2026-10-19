@@ -196,6 +196,92 @@ final class PostgresEntityStorePostgresIntegrationTest {
         }
     }
 
+    @Test
+    void serializesAtomicOperationsThatAcquireTheSameAdvisoryLock() throws Exception {
+        IPostgresDatabase database = postgresDatabase(
+                "tavall-postgres-advisory-transaction-lock"
+        );
+        String lockKey = "provider-external:discord:" + java.util.UUID.randomUUID();
+
+        try {
+            CountDownLatch firstLockAcquired = new CountDownLatch(1);
+            CountDownLatch releaseFirstOperation = new CountDownLatch(1);
+            CountDownLatch secondAttemptingLock = new CountDownLatch(1);
+            CountDownLatch secondLockAcquired = new CountDownLatch(1);
+            AtomicReference<Throwable> firstFailure = new AtomicReference<>();
+            AtomicReference<Throwable> secondFailure = new AtomicReference<>();
+
+            Thread firstOperation = Thread.ofVirtual().start(() -> {
+                try {
+                    database.entities().executeAtomic(entities -> {
+                        entities.acquireAdvisoryTransactionLock(lockKey);
+                        firstLockAcquired.countDown();
+                        await(releaseFirstOperation);
+                        return null;
+                    });
+                } catch (Throwable throwable) {
+                    firstFailure.set(throwable);
+                }
+            });
+
+            assertTrue(firstLockAcquired.await(5, TimeUnit.SECONDS));
+
+            Thread secondOperation = Thread.ofVirtual().start(() -> {
+                try {
+                    database.entities().executeAtomic(entities -> {
+                        secondAttemptingLock.countDown();
+                        entities.acquireAdvisoryTransactionLock(lockKey);
+                        secondLockAcquired.countDown();
+                        return null;
+                    });
+                } catch (Throwable throwable) {
+                    secondFailure.set(throwable);
+                }
+            });
+
+            assertTrue(secondAttemptingLock.await(5, TimeUnit.SECONDS));
+            assertFalse(secondLockAcquired.await(250, TimeUnit.MILLISECONDS));
+
+            releaseFirstOperation.countDown();
+            firstOperation.join(5_000L);
+            secondOperation.join(5_000L);
+
+            assertFalse(firstOperation.isAlive());
+            assertFalse(secondOperation.isAlive());
+            assertNull(firstFailure.get());
+            assertNull(secondFailure.get());
+            assertTrue(secondLockAcquired.await(1, TimeUnit.SECONDS));
+        } finally {
+            database.close();
+        }
+    }
+
+    @Test
+    void rollbackReleasesAdvisoryTransactionLock() {
+        IPostgresDatabase database = postgresDatabase(
+                "tavall-postgres-advisory-transaction-lock-rollback"
+        );
+        String lockKey = "rollback:" + java.util.UUID.randomUUID();
+
+        try {
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> database.entities().executeAtomic(entities -> {
+                        entities.acquireAdvisoryTransactionLock(lockKey);
+                        throw new IllegalStateException("force transaction rollback");
+                    })
+            );
+
+            boolean reacquired = database.entities().executeAtomic(entities -> {
+                entities.acquireAdvisoryTransactionLock(lockKey);
+                return true;
+            });
+            assertTrue(reacquired);
+        } finally {
+            database.close();
+        }
+    }
+
     private IPostgresDatabase postgresDatabase(String persistenceUnitName) {
         return PostgresDatabaseBuilder.create()
                 .jdbcUrl(requireEnvironment("TAVALL_TEST_POSTGRES_JDBC_URL"))
