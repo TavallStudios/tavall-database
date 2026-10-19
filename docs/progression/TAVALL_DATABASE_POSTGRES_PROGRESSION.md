@@ -7,7 +7,7 @@
 > **Owning System:** `Tavall Database`  
 > **Owns:** Audited implementation, integration, validation, and historical progression for `tavall-database-postgres`  
 > **Does Not Own:** Aggregate system progression, deployment history, product/design rules, or Git workflow policy  
-> **Audited Against:** main `bdc67789723462ba435c5953035a6b632e8c44bc` plus advisory-lock PR #29 source `32aa272861726f6fefec116bd459e5075d336004` and Tavall-MC consumer PR #333
+> **Audited Against:** current main `bdc67789723462ba435c5953035a6b632e8c44bc` plus merge-synced PR #29 commit `882838f7526703c62db8cb9de819bea33cc9e5de` and Tavall-MC consumer PR #333
 > **Last Reconciled:** `2026-10-19 2:34 PM PDT`
 
 ## About
@@ -28,14 +28,14 @@ This record measures the module’s implementation maturity, API/integration sta
 | Runtime Owner | `None` |
 | Primary Consumers | Tavall-MC account-link completion is the first candidate consumer; exact-source and package-backed acceptance are pending. |
 | Current Branch / PR Stack | Advisory-lock API was carried by PR #29; CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17) is a separate staging path. PRs #27 and #30 are merged. |
-| Audited Revision | Current main `bdc67789723462ba435c5953035a6b632e8c44bc` plus PR #29 source `32aa272861726f6fefec116bd459e5075d336004`. |
+| Audited Revision | Main base `bdc67789723462ba435c5953035a6b632e8c44bc` plus merge commit `882838f7526703c62db8cb9de819bea33cc9e5de`. |
 
 ## Current Status
 
 | Field | State |
 | --- | --- |
 | Overall State | PARTIAL |
-| Current Phase | PR #29 adds the typed transaction advisory-lock operation on top of current main; the main-synchronized provider check passes locally. Immutable artifact publication and PostgreSQL service acceptance remain open. |
+| Current Phase | The typed advisory-lock operation is integrated with current main at merge commit `882838f7526703c62db8cb9de819bea33cc9e5de`; provider check is passing locally. Immutable artifact publication and PostgreSQL service acceptance remain open. |
 | Implementation | PostgreSQL entity persistence and the advisory-lock operation remain inside the existing provider boundary; no runtime was added. |
 | Integration | Tavall-MC PR #333 is the first source-composed consumer; runtime/package acceptance remains separate. |
 | Validation | :tavall-database-postgres:check --rerun-tasks passed on the current merge candidate: 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because TAVALL_TEST_POSTGRES_JDBC_URL is unset. |
@@ -102,8 +102,8 @@ Record the exact PR merge and Bot outcome, then prove PostgreSQL contention/roll
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | 2026-10-19 2:34 PM PDT | PR #29 source synchronized with main bdc6778; local provider check total 17, 12 passed, 5 skipped. |
-| Notion | TEMPORARY_DRIFT | [tavall-database-postgres — PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db) | 2026-10-19 2:34 PM PDT | Existing 1:1 twin needs refresh from the updated GitHub progression and exact-source check. |
+| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | 2026-10-19 2:34 PM PDT | PR #29 main-synchronized provider check: 17 total tests, 12 passed, 5 skipped. |
+| Notion | TEMPORARY_DRIFT | [tavall-database-postgres — PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db) | 2026-10-19 2:34 PM PDT | Refresh from the current GitHub progression, then fetch to verify the 1:1 twin. |
 
 ### Update History
 

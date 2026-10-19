@@ -188,7 +188,7 @@ See the boundary decision in Section 6. The selected operation is smaller than a
 
 | Surface | Sync State | Location | Evidence |
 | --- | --- | --- | --- |
-| GitHub | PRIMARY | docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md | PR #29 source synchronized with main bdc6778; local provider check passed with 12 tests and 5 PostgreSQL-service skips. |
-| Notion | TEMPORARY_DRIFT | [PostgreSQL Advisory Transaction Lock — TECHNICAL DESIGN](https://app.notion.com/p/3ef38458ddfd817dbd45cafbad104cc0) | Existing 1:1 twin will be refreshed from the current GitHub technical design. |
+| GitHub | PRIMARY | docs/technical-design/POSTGRES_ADVISORY_TRANSACTION_LOCK_TECHNICAL_DESIGN.md | PR #29 synchronized with main bdc6778; provider check 17 total tests, 12 passed, 5 PostgreSQL-service tests skipped. |
+| Notion | TEMPORARY_DRIFT | [PostgreSQL Advisory Transaction Lock — TECHNICAL DESIGN](https://app.notion.com/p/3ef38458ddfd817dbd45cafbad104cc0) | Refresh after pushing the current PR #29 source, then fetch to verify the 1:1 twin. |
 
 </details>

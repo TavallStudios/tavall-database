@@ -6,7 +6,7 @@
 > **System:** `Tavall Database`  
 > **Owns:** Cross-module contract/provider architecture, consumer assembly, verification state, and system history  
 > **Does Not Own:** Individual module implementation detail, remote database operations, or facts not evidenced in GitHub  
-> **Audited Against:** main `bdc67789723462ba435c5953035a6b632e8c44bc` plus advisory-lock PR #29 source `32aa272861726f6fefec116bd459e5075d336004`
+> **Audited Against:** current main `bdc67789723462ba435c5953035a6b632e8c44bc` plus merge-synced PR #29 commit `882838f7526703c62db8cb9de819bea33cc9e5de`
 > **Last Reconciled:** `2026-10-19 2:34 PM PDT`
 
 ## About
@@ -23,7 +23,7 @@ This record tracks system boundaries and aggregate verification. See each module
 | Audited main revision | [`bdc67789723462ba435c5953035a6b632e8c44bc`](https://github.com/TavallStudios/tavall-database/commit/bdc67789723462ba435c5953035a6b632e8c44bc) |
 | Build | Gradle multi-project; JDK 25 |
 | Runtime owner | None; consuming applications own provider configuration and service endpoints. |
-| Current PR context | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17) targets staging; advisory-lock PR [#29](https://github.com/TavallStudios/tavall-database/pull/29) is the current mainline source change. PRs #27 and #30 are merged. |
+| Current PR context | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17) targets staging; advisory-lock capability is carried by PR #29 and merge-synced commit `882838f7526703c62db8cb9de819bea33cc9e5de`. PRs #27 and #30 are merged. |
 | Overall state | `PARTIAL` |
 
 ## Current Status
@@ -108,8 +108,8 @@ Run PostgreSQL contention/rollback on a disposable database and validate immutab
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-09-27 5:59 PM PDT | Documentation branch `working/canonical-readme-module-docs-2026-09-27`, PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. |
-| Notion | TEMPORARY_DRIFT | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-19 2:34 PM PDT | Existing 1:1 twin is being refreshed from the current GitHub source and exact local evidence. |
+| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md | 2026-10-19 2:34 PM PDT | PR #29 main synchronization and provider check evidence recorded in this progression. |
+| Notion | TEMPORARY_DRIFT | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-19 2:34 PM PDT | Refresh from the current GitHub progression, then fetch to verify the 1:1 twin. |
 
 ### Update History
 
