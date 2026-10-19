@@ -6,12 +6,12 @@
 > **System:** `Tavall Database`  
 > **Owns:** Cross-module contract/provider architecture, consumer assembly, verification state, and system history  
 > **Does Not Own:** Individual module implementation detail, remote database operations, or facts not evidenced in GitHub  
-> **Audited Against:** Current main `d637362444fa02ce49f4b74ac52b8f5a8aec3670` plus Postgres advisory-lock producer PR #29 and Tavall-MC consumer PR #333
-> **Last Reconciled:** `2026-10-04 UTC`
+> **Audited Against:** main `bdc67789723462ba435c5953035a6b632e8c44bc` plus advisory-lock PR #29 source `32aa272861726f6fefec116bd459e5075d336004`
+> **Last Reconciled:** `2026-10-19 2:34 PM PDT`
 
 ## About
 
-Tavall Database is a seven-project Gradle system with shared database contracts, four provider implementations, an aggregate consumer module, and a cross-provider test suite. No independently hosted database runtime is defined by these modules; consuming applications choose and configure providers.
+Tavall Database is an eight-project Gradle system with shared database contracts, a client-free Redis API, four provider implementations, an aggregate consumer module, and a cross-provider test suite. No independently hosted database runtime is defined by these modules; consuming applications choose and configure providers.
 
 This record tracks system boundaries and aggregate verification. See each module Progression for its source history and module test evidence.
 
@@ -20,22 +20,22 @@ This record tracks system boundaries and aggregate verification. See each module
 | Field | Value |
 | --- | --- |
 | Repository | [TavallStudios/tavall-database](https://github.com/TavallStudios/tavall-database) |
-| Audited main revision | [`d637362444fa02ce49f4b74ac52b8f5a8aec3670`](https://github.com/TavallStudios/tavall-database/commit/d637362444fa02ce49f4b74ac52b8f5a8aec3670); Postgres feature checkpoint `0685f72` |
+| Audited main revision | [`bdc67789723462ba435c5953035a6b632e8c44bc`](https://github.com/TavallStudios/tavall-database/commit/bdc67789723462ba435c5953035a6b632e8c44bc) |
 | Build | Gradle multi-project; JDK 25 |
 | Runtime owner | None; consuming applications own provider configuration and service endpoints. |
-| Current PR stack | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17), entity-access guide [#27](https://github.com/TavallStudios/tavall-database/pull/27), and advisory-lock producer [#29](https://github.com/TavallStudios/tavall-database/pull/29) |
+| Current PR context | CI transition [#17](https://github.com/TavallStudios/tavall-database/pull/17) targets staging; advisory-lock PR [#29](https://github.com/TavallStudios/tavall-database/pull/29) is the current mainline source change. PRs #27 and #30 are merged. |
 | Overall state | `PARTIAL` |
 
 ## Current Status
 
 | Area | State |
 | --- | --- |
-| Module boundaries | Seven independent Gradle subprojects are documented below; the root build is an aggregator. |
-| Implementation | 82 production Java source files are tracked across the provider, contracts, and aggregate modules. |
-| Verification | `:tavall-database-postgres:check` passed locally on PR #29 source (12 tests passed, five PostgreSQL-service tests skipped); MC exact-source account-link tests and `:novus-backend:check` also passed locally. Other provider/test-suite modules were not run in this pass. |
-| CI ownership | Exact-source module CI remains open in PR #17 and is not on current main. |
-| Runtime integration | Providers remain assembled by `tavall-database-core`; MC account-link completion consumes the typed operation in source composition, but PostgreSQL and package-backed acceptance remain open. |
-| Primary blocker | No PostgreSQL lock contention/rollback run, exact-source Tavall CI run, immutable artifact publication, or package-backed MC consumer result is available yet. |
+| Module boundaries | Eight Gradle subprojects are on main, including the client-free Redis API and its Jedis provider. |
+| Implementation | tavall-database-postgres owns PostgreSQL/JPA transaction mechanics; no independent runtime is defined. |
+| Verification | The main-synchronized PR #29 candidate passed :tavall-database-postgres:check --rerun-tasks: 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because TAVALL_TEST_POSTGRES_JDBC_URL is unset. |
+| CI ownership | No .tavallci/ci.yaml is on main. Local CI transition PR #17 targets staging/platform; GitHub Actions is not Tavall CI compute. |
+| Runtime integration | Tavall-MC PR #333 is the first source-composed consumer. PostgreSQL contention/rollback and package-backed consumer acceptance remain unverified. |
+| Remaining acceptance | Run PostgreSQL integration against an explicitly disposable database and validate an immutable package-backed consumer after Tavall CI publishes the provider artifact. |
 
 ## Module Map
 
@@ -45,7 +45,8 @@ This record tracks system boundaries and aggregate verification. See each module
 | [`tavall-database-core`](../../tavall-database-core/README.md) | `LIBRARY` | None | Aggregate dependency surface for consumers | [Progression](TAVALL_DATABASE_CORE_PROGRESSION.md) |
 | [`tavall-database-postgres`](../../tavall-database-postgres/README.md) | `PROVIDER` | None | PostgreSQL and JPA provider | [Progression](TAVALL_DATABASE_POSTGRES_PROGRESSION.md) |
 | [`tavall-database-mongo`](../../tavall-database-mongo/README.md) | `PROVIDER` | None | MongoDB provider | [Progression](TAVALL_DATABASE_MONGO_PROGRESSION.md) |
-| [`tavall-database-redis`](../../tavall-database-redis/README.md) | `PROVIDER` | None | Redis provider | [Progression](TAVALL_DATABASE_REDIS_PROGRESSION.md) |
+| [`tavall-database-redis-api`](../../tavall-database-redis-api/README.md) | `API` | Owning consumer runtime | Client-free Redis contracts, leases, fenced records, provider SPI | [Progression](TAVALL_DATABASE_REDIS_API_PROGRESSION.md) |
+| [`tavall-database-redis`](../../tavall-database-redis/README.md) | `FEATURE` (secondary `PROVIDER`) | None | Jedis-backed Redis provider | [Progression](TAVALL_DATABASE_REDIS_PROGRESSION.md) |
 | [`tavall-database-qdrant`](../../tavall-database-qdrant/README.md) | `PROVIDER` | None | Qdrant provider | [Progression](TAVALL_DATABASE_QDRANT_PROGRESSION.md) |
 | [`tavall-database-test-suite`](../../tavall-database-test-suite/README.md) | `TEST_SUITE` | None | Cross-provider tests and remote-service smoke configurations | [Progression](TAVALL_DATABASE_TEST_SUITE_PROGRESSION.md) |
 
@@ -53,12 +54,12 @@ This record tracks system boundaries and aggregate verification. See each module
 
 | Boundary | Relationship | Evidence / state |
 | --- | --- | --- |
-| Contracts | Depends on Tavall Logging. | Declared in the root build; dependency resolution was not run. |
-| Core aggregate | Depends on contracts and all four provider modules. | Dependency assembly was not built or tested in this audit. |
-| PostgreSQL provider | PostgreSQL, Jakarta Persistence, and Hibernate boundaries; H2/JUnit test dependencies. | Module check passed locally at `0685f72`; H2/unit paths executed, five PostgreSQL-service cases skipped; no external database service was contacted. |
-| PostgreSQL advisory operation | Typed transaction-scoped lock on `IPostgresEntityOperationContext`; PostgreSQL SQL remains provider-owned. | Producer unit checks and MC consumer source tests passed locally; real PostgreSQL and immutable package consumer results remain pending. See [provider Progression](TAVALL_DATABASE_POSTGRES_PROGRESSION.md). |
-| MongoDB, Redis, Qdrant providers | Depend on their vendor client libraries and the shared contracts. | Remote service behavior is not verified; Redis TLS support is present in source history. |
-| Test suite | Aggregates core/providers and tracks remote database test configurations. | 11 test source files are in the test-suite module; service-backed tests were not run. |
+| Contracts | Depends on Tavall Logging. | Declared in the root build; package resolution remains an external dependency boundary. |
+| Core aggregate | Depends on contracts, the Redis API, and all four provider modules. | The current main source includes the Redis API/provider split. |
+| Redis API | Client-free leases, fenced records and provider SPI; Redis provider is separate. | PR #30 merged at 7c768ca595447aa091da0724ef414b24bacc41bc; package publication and product consumer acceptance remain separate. |
+| PostgreSQL advisory operation | Typed transaction-scoped lock on IPostgresEntityOperationContext; PostgreSQL SQL remains provider-owned. | PR #29 is synchronized with current main; the local provider check passes on the merged-source candidate, with five PostgreSQL-service tests skipped. |
+| MongoDB, Redis and Qdrant providers | Vendor client libraries remain inside their provider modules; the aggregate assembles the providers. | Remote service behavior is not inferred from source or provider unit tests. |
+| Test suite | Aggregates core/providers and tracks remote database test configurations. | The PostgreSQL provider check ran; other provider/system profiles were not run in this pass. |
 
 ## Progression Timeline
 
@@ -75,43 +76,47 @@ This record tracks system boundaries and aggregate verification. See each module
 | 2026-09-22 3:52 AM PDT | `IN_PROGRESS` | Required explicit JPA entity package configuration. | [`eb8d2e465e07`](https://github.com/TavallStudios/tavall-database/commit/eb8d2e465e0715abb29e15f840d228e9bb1cbdeb) | Entity discovery now requires an explicit package boundary; regression tests were not run in this rollout. |
 | 2026-09-22 5:15 AM PDT | `IN_PROGRESS` | Added a trusted PostgreSQL statement boundary. | [`ac40359d734f`](https://github.com/TavallStudios/tavall-database/commit/ac40359d734f18474fd444881d0b20e6b862374e) | SQL trust boundary changed in source history; no database acceptance is implied. |
 | 2026-09-22 6:26 AM PDT | `IN_PROGRESS` | Avoided invalid Hibernate JNDI registration. | [`05bf86389119`](https://github.com/TavallStudios/tavall-database/commit/05bf86389119982511cfeb2b924d12f08faa0f8b) | Hibernate registration behavior changed; runtime/database verification remains outstanding. |
-| 2026-10-04 UTC | `IN_PROGRESS` | Added typed PostgreSQL transaction advisory lock under the existing atomic entity context. | [`0685f72`](https://github.com/TavallStudios/tavall-database/commit/0685f72) | Provider module check passed locally; the exact-source MC account-link consumer and real PostgreSQL integration remain pending. |
+| `2026-10-09 2:13 PM PDT` | `VALIDATED` | Split Redis into a client-free API module and a Jedis provider module. The API owns the Redis contracts, typed leases and fenced records, and the provider SPI; the provider supplies the Jedis implementation and the `IJedis*` compatibility boundary. | [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009`; affected: `tavall-database-redis-api`, `tavall-database-redis`, `tavall-database-core`, `tavall-database-test-suite` | Validated locally per the commit: `check` passed and `RedisDatabaseContractTest` passed 8/8. Local only: not pushed, not published to GitHub Packages, and no consumer has migrated; Tavall Cloud and Tavall MC remain on raw-Jedis 1.0.0 usage. |
+
+| 2026-10-19 2:34 PM PDT | IN_PROGRESS | Reconciled advisory-lock PR #29 with current main and ran the PostgreSQL provider check on the merged-source candidate. | PR #29 and current main bdc6778 | 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because no test JDBC URL is configured; main merge and package/runtime acceptance remain separate. |
 
 ## Validation State
 
 | Validation | State | Evidence | Remaining Work |
 | --- | --- | --- | --- |
-| Module map and build boundaries | Audited | Main settings/build, source paths, and module READMEs | Reconcile future build/module changes in this system record |
-| Unit tests | Provider-level check passed locally | Postgres `:tavall-database-postgres:check` at `0685f72`: 12 passed; five Postgres service tests skipped; other modules not executed. | Run exact-source module checks through Tavall CI |
-| Database integration | Not run | Remote database fixtures and smoke configurations are tracked; no database service was contacted | Run tests against explicitly configured approved test services and record the result |
-| Consumer acceptance | Partial | Tavall-MC account-link source-composite tests pass locally; PostgreSQL integration, exact-source Tavall CI, and immutable package resolution remain open. | Verify package-backed provider selection/configuration through the consumer |
-| Module CI | Missing in audited main | No module `.tavallci/ci.yaml` files were found | Add CI definitions through a separate CI-scoped change |
+| Module map and build boundaries | Audited against current main | Main bdc6778 and the eight-project Gradle reactor. | Reconcile future module changes against the owning system progression. |
+| PostgreSQL provider check | Passed locally on the main-synchronized PR #29 candidate | :tavall-database-postgres:check --rerun-tasks: 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped cases require PostgreSQL service because TAVALL_TEST_POSTGRES_JDBC_URL is unset. | Repeat on the pushed exact PR head; record Tavall Bot checks if emitted. |
+| PostgreSQL contention and rollback | Not run | No PostgreSQL service was contacted. | Run against an explicitly disposable service when its test JDBC URL is configured. |
+| Consumer source composition | Partial | Tavall-MC PR #333 uses acquireAdvisoryTransactionLock in one atomic operation; earlier focused MC tests are branch-bound evidence. | Rerun against the current exact producer/consumer source set. |
+| Package-backed consumer | Not run | No immutable provider artifact was selected for the consumer. | Publish/select an immutable artifact through Tavall CI and validate without source substitution. |
+| Module CI | Missing on main | PR #17 targets persistent staging/platform. | Continue that existing source-owned CI transition separately. |
 
-## Blockers
+## Acceptance Still Open
 
-| Blocker | Impact | Resolution |
+| Acceptance | Impact | Next action |
 | --- | --- | --- |
-| Module CI and executed verification are absent. | Passing provider behavior cannot be inferred from tracked test sources. | Add module CI definitions and run the configured checks. |
-| Remote database scenarios are unexecuted. | Connection, query, TLS, JPA, and vendor behavior remain unverified against services. | Run the provider tests against explicitly configured approved test services. |
-| No immutable artifact is available for package-backed acceptance. | MC artifact resolution without source composition cannot be demonstrated. | Publish/select the exact artifact through Tavall CI and validate the package consumer separately. |
-| MC schema rollout is not accepted. | Test-fixture constraints do not install or upgrade product schema. | Define and use the Tavall Database-owned migration path; test it only against disposable databases. |
+| PostgreSQL service integration | Contention and rollback/release are not proven against PostgreSQL. | Run on an explicitly disposable service when available. |
+| Immutable package consumer | Source composition does not prove published artifact resolution. | Publish/select the exact artifact through Tavall CI and validate the consumer without source substitution. |
+| Main module CI | No .tavallci definition is on main; PR #17 targets staging. | Continue the existing CI transition through its source-owned checks. |
 
 ## Next Slice
 
-Add the module CI definitions, run each provider's appropriate tests and remote-service scenarios in approved test environments, then verify the aggregate through a consuming application. Update the provider and system records with actual results.
+Run PostgreSQL contention/rollback on a disposable database and validate immutable package-backed consumption through Tavall CI. Continue the existing PR #17 CI transition on its staging target.
 
 <details>
 <summary>Documentation Update State</summary>
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-10-04 UTC | PR #29 branch based on `main@d637362444fa02ce49f4b74ac52b8f5a8aec3670`. |
-| Notion | `SYNCED` | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-04 UTC | 1:1 system Progression mirror under Tavall Database — GENERAL, fetched after update. |
+| GitHub | `PRIMARY` | `TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | 2026-09-27 5:59 PM PDT | Documentation branch `working/canonical-readme-module-docs-2026-09-27`, PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. |
+| Notion | TEMPORARY_DRIFT | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-19 2:34 PM PDT | Existing 1:1 twin is being refreshed from the current GitHub source and exact local evidence. |
 
 ### Update History
 
 | Timestamp | Surface | Event | Location | Previous Location | Evidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | 2026-09-27 5:59 PM PDT | GitHub | `CREATED` | `docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | — | PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. | Created system Progression from current module, build, and source-history evidence. |
+| 2026-10-09 2:13 PM PDT | GitHub | `UPDATED` | `docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | Same path | Commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009` | Added the Redis API module, the Redis provider role, the eight-project count, and the 2026-10-09 system timeline entry. |
 
+| 2026-10-19 2:34 PM PDT | GitHub | UPDATED | docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md | Same path | PR #29 main synchronization; local provider check result | Reconciled the system map to main bdc6778 and the Redis API/provider split; Notion post-fetch sync follows. |
 </details>

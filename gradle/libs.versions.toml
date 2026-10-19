@@ -8,6 +8,7 @@ junit = "5.11.4"
 mongo = "4.11.1"
 postgres = "42.7.10"
 tavall = "1.0.0"
+testcontainers = "2.0.5"
 
 [libraries]
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
@@ -21,4 +22,6 @@ junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "1.11.4" }
 mongodb-driver = { module = "org.mongodb:mongodb-driver-sync", version.ref = "mongo" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
 tavall-logging = { module = "org.tavall:tavall-logging", version.ref = "tavall" }

@@ -1,22 +1,20 @@
 package org.tavall.database.redis.connection;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import org.tavall.database.redis.IRedisConfigData;
 import org.tavall.database.redis.exception.RedisConnectionException;
 import org.tavall.logging.Log;
 import redis.clients.jedis.JedisPooled;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+/** Owns one shared Jedis pool for a configured Redis database. */
+public final class RedisConnectionHandler implements IJedisRedisConnectionHandler {
 
-public final class RedisConnectionHandler implements IRedisConnectionHandler {
-
-    private final IRedisConfigData configData;
     private final JedisPooled client;
-    private boolean closed;
+    private volatile boolean closed;
 
     public RedisConnectionHandler(IRedisConfigData configData) {
-        this.configData = configData;
         this.client = new JedisPooled(buildRedisUrl(configData));
     }
 
@@ -30,11 +28,7 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
 
     @Override
     public void closeClient(JedisPooled client) {
-        if (client == null) {
-            return;
-        }
-
-        // JedisPooled is the handler-owned shared pool. Per-operation callers should not close it.
+        // JedisPooled is the handler-owned shared pool. Per-operation callers must not close it.
     }
 
     @Override
@@ -42,7 +36,6 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
         if (closed) {
             return false;
         }
-
         try {
             return "PONG".equalsIgnoreCase(client.ping());
         } catch (RuntimeException exception) {
@@ -56,12 +49,12 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (closed) {
             return;
         }
         closed = true;
-        closeClient(client);
+        client.close();
     }
 
     static String buildRedisUrl(IRedisConfigData configData) {
@@ -70,7 +63,6 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
         String password = configData.getPassword();
         boolean hasUsername = username != null && !username.isBlank();
         boolean hasPassword = password != null && !password.isBlank();
-
         if (hasUsername || hasPassword) {
             if (hasUsername) {
                 redisUrl.append(URLEncoder.encode(username, StandardCharsets.UTF_8));
@@ -82,7 +74,6 @@ public final class RedisConnectionHandler implements IRedisConnectionHandler {
             }
             redisUrl.append('@');
         }
-
         redisUrl.append(configData.getHost())
                 .append(':')
                 .append(configData.getPort())

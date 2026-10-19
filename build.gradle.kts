@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.tavall"
-version = providers.gradleProperty("tavallVersion").orElse("1.0.0").get()
+version = providers.gradleProperty("tavallVersion").orElse("1.1.0").get()
 
 val h2 = libs.h2
 val hibernateOrm = libs.hibernate.orm
@@ -19,6 +19,8 @@ val junitPlatformLauncher = libs.junit.platform.launcher
 val mongodbDriver = libs.mongodb.driver
 val postgresql = libs.postgresql
 val tavallLogging = libs.tavall.logging
+val testcontainersBom = libs.testcontainers.bom
+val testcontainersJunitJupiter = libs.testcontainers.junit.jupiter
 
 subprojects {
     group = rootProject.group
@@ -109,6 +111,14 @@ subprojects {
             }
         }
         repositories {
+            // Exact-source publication target (Tavall CI staging repository); unset by default.
+            val exactSourceRepository = providers.gradleProperty("tavallPublishRepository").orNull
+            if (!exactSourceRepository.isNullOrBlank()) {
+                maven {
+                    name = "TavallExactSource"
+                    url = uri(exactSourceRepository)
+                }
+            }
             val token = providers.environmentVariable("GITHUB_TOKEN")
             if (token.isPresent) {
                 maven {
@@ -154,9 +164,30 @@ project(":tavall-database-mongo") {
     }
 }
 
-project(":tavall-database-redis") {
+project(":tavall-database-redis-api") {
     dependencies {
         "api"(project(":tavall-database-core-contracts"))
+    }
+
+    // The public Redis API must stay client-free; a concrete client belongs only to the provider module.
+    val verifyClientFreeApi = tasks.register("verifyClientFreeApi") {
+        val compileClasspath = configurations.named("compileClasspath")
+        inputs.files(compileClasspath)
+        doLast {
+            val leaked = compileClasspath.get().resolvedConfiguration.resolvedArtifacts
+                .map { "${it.moduleVersion.id.group}:${it.name}" }
+                .filter { it.startsWith("redis.clients") || it.startsWith("io.lettuce") || it.startsWith("org.redisson") }
+            check(leaked.isEmpty()) { "tavall-database-redis-api must not expose a concrete Redis client: $leaked" }
+        }
+    }
+    tasks.named("check") {
+        dependsOn(verifyClientFreeApi)
+    }
+}
+
+project(":tavall-database-redis") {
+    dependencies {
+        "api"(project(":tavall-database-redis-api"))
         "api"(jedis)
         "testImplementation"(junitJupiter)
         "testRuntimeOnly"("org.apiguardian:apiguardian-api:1.1.2")
@@ -177,6 +208,7 @@ project(":tavall-database-qdrant") {
 project(":tavall-database-core") {
     dependencies {
         "api"(project(":tavall-database-core-contracts"))
+        "api"(project(":tavall-database-redis-api"))
         "api"(project(":tavall-database-postgres"))
         "api"(project(":tavall-database-mongo"))
         "api"(project(":tavall-database-redis"))
@@ -187,6 +219,9 @@ project(":tavall-database-core") {
 project(":tavall-database-test-suite") {
     dependencies {
         "api"(project(":tavall-database-core"))
+        "api"(project(":tavall-database-redis-api"))
+        "testImplementation"(platform(testcontainersBom))
+        "testImplementation"(testcontainersJunitJupiter)
         "api"(project(":tavall-database-postgres"))
         "api"(project(":tavall-database-mongo"))
         "api"(project(":tavall-database-redis"))

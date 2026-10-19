@@ -1,10 +1,7 @@
 package org.tavall.database.redis;
 
-import org.tavall.database.redis.connection.IRedisConnectionHandler;
 import org.tavall.database.redis.connection.RedisConnectionHandler;
 import org.tavall.database.redis.exception.RedisDatabaseException;
-import org.tavall.database.redis.query.IRedisQueryHandler;
-import org.tavall.database.redis.query.RedisQueryHandler;
 import org.tavall.logging.Log;
 
 import java.util.Optional;
@@ -70,6 +67,11 @@ public final class RedisDatabaseBuilder implements IRedisDatabaseBuilder {
 
     @Override
     public Optional<IRedisDatabase> build() {
+        return buildJedis().map(IRedisDatabase.class::cast);
+    }
+
+    /** Builds the Jedis-backed database; use only where raw-client compatibility is still required. */
+    public Optional<IJedisRedisDatabase> buildJedis() {
         if (host == null || host.isBlank()) {
             RedisDatabaseException exception = new RedisDatabaseException(
                     "Unable to build Redis database because host is null or blank."
@@ -102,9 +104,8 @@ public final class RedisDatabaseBuilder implements IRedisDatabaseBuilder {
                     databaseIndex,
                     tlsEnabled
             );
-            IRedisConnectionHandler connections = new RedisConnectionHandler(configData);
-            IRedisQueryHandler queries = new RedisQueryHandler(connections);
-            IRedisDatabase database = new RedisDatabase(configData, connections, queries);
+            RedisConnectionHandler connections = new RedisConnectionHandler(configData);
+            IJedisRedisDatabase database = new RedisDatabase(configData, connections);
             return Optional.of(database);
         } catch (RuntimeException exception) {
             RedisDatabaseException redisDatabaseException = new RedisDatabaseException(
