@@ -8,7 +8,7 @@
 > **Owns:** Audited implementation, integration, validation, and historical progression for `tavall-database-postgres`  
 > **Does Not Own:** Aggregate system progression, deployment history, product/design rules, or Git workflow policy  
 > **Audited Against:** current main `bdc67789723462ba435c5953035a6b632e8c44bc` plus merge-synced PR #29 commit `882838f7526703c62db8cb9de819bea33cc9e5de` and Tavall-MC consumer PR #333
-> **Last Reconciled:** `2026-10-19 2:34 PM PDT`
+> **Last Reconciled:** `2026-10-19 2:51 PM PDT`
 
 ## About
 
@@ -35,14 +35,14 @@ This record measures the module’s implementation maturity, API/integration sta
 | Field | State |
 | --- | --- |
 | Overall State | PARTIAL |
-| Current Phase | The typed advisory-lock operation is integrated with current main at merge commit `882838f7526703c62db8cb9de819bea33cc9e5de`; provider check is passing locally. Immutable artifact publication and PostgreSQL service acceptance remain open. |
+| Current Phase | The main-synchronized PR #29 candidate contains the typed advisory-lock operation at merge commit `882838f7526703c62db8cb9de819bea33cc9e5de`; the provider check passes locally. Immutable artifact publication and PostgreSQL service acceptance remain open. |
 | Implementation | PostgreSQL entity persistence and the advisory-lock operation remain inside the existing provider boundary; no runtime was added. |
 | Integration | Tavall-MC PR #333 is the first source-composed consumer; runtime/package acceptance remains separate. |
 | Validation | :tavall-database-postgres:check --rerun-tasks passed on the current merge candidate: 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because TAVALL_TEST_POSTGRES_JDBC_URL is unset. |
 | Runtime / Consumer Acceptance | Runtime owner is None; no package-backed or live PostgreSQL acceptance is claimed. |
 | Deployment Verification | N/A for this non-runtime module. |
 | Remaining Acceptance | PostgreSQL contention/rollback, immutable artifact publication, exact-head Bot checks, and package-backed MC consumer acceptance remain unverified. |
-| Next Slice | Push the main-synchronized PR #29 head, rerun/retain exact-head evidence, then complete the authorized merge and package/database acceptance work. |
+| Next Slice | Revalidate the final pushed PR #29 head, refresh Tavall Bot evidence, and complete the authorized merge; package publication and PostgreSQL service acceptance follow through their owning paths. |
 
 ## Progression Timeline
 
@@ -57,7 +57,7 @@ This record measures the module’s implementation maturity, API/integration sta
 | 2026-10-04 UTC | `IN_PROGRESS` | Add the typed transaction-scoped advisory lock operation | [`0685f72`](https://github.com/TavallStudios/tavall-database/commit/0685f72) | `:tavall-database-postgres:check` passed locally; 12 tests passed and five PostgreSQL-service integration cases were skipped because no test JDBC URL was supplied. |
 | 2026-10-04 UTC | `IN_PROGRESS` | Consume the lock through Tavall-MC account-link completion | [Tavall-MC PR #333](https://github.com/TavallStudios/tavall-mc/pull/333) | Focused MC account-link tests and `:novus-backend:check` passed on the exact-source candidate; three existing PostgreSQL/Redis-gated backend tests were skipped. PostgreSQL lock-contention acceptance remains unrun. |
 
-| 2026-10-19 2:34 PM PDT | IN_PROGRESS | Reconciled PR #29 with current main and reran the provider module check. | Current main bdc6778 plus PR #29 source 32aa272 | 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because no test JDBC URL is configured. |
+| 2026-10-19 2:34 PM PDT | IN_PROGRESS | Reconciled PR #29 with current main and reran the provider module check. | Current main bdc6778 plus the PR #29 advisory-lock source, synchronized by merge commit 882838f | 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped tests require PostgreSQL service because no test JDBC URL is configured. |
 
 
 ## Validation State
@@ -65,7 +65,7 @@ This record measures the module’s implementation maturity, API/integration sta
 | Validation | State | Evidence | Remaining Work |
 | --- | --- | --- | --- |
 | Architecture / module boundary | Audited | Current main bdc6778, root settings/build, module map and provider README. | Reconcile future changes against module ownership. |
-| Unit | Provider module check passed locally | Main-synchronized PR #29 candidate: :tavall-database-postgres:check --rerun-tasks; 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped cases require PostgreSQL service. The local-only init script resolved Tavall Logging from the existing private snapshot path. | Repeat after pushing the final PR head; check Tavall Bot exact-head evidence when emitted. |
+| Unit | Provider module check passed locally | Main-synchronized PR #29 candidate: :tavall-database-postgres:check --rerun-tasks; 17 tests total (12 passed, 5 skipped), 0 failures/errors; all 5 skipped cases require PostgreSQL service. The local-only init script resolved Tavall Logging from the existing private snapshot path. | Revalidate on the final pushed head and record the exact Tavall Bot result if emitted. |
 | PostgreSQL integration | Not run | TAVALL_TEST_POSTGRES_JDBC_URL is unset; no PostgreSQL service was contacted. | Run against an explicitly disposable database. |
 | Consumer source composition | Partial | Tavall-MC PR #333 consumes acquireAdvisoryTransactionLock in one atomic operation; earlier focused source-composition tests are branch-bound evidence. | Rerun the exact producer/consumer source pair. |
 | Consumer package resolution | Not run | No immutable artifact from the current provider source was selected. | Publish/select an immutable artifact through Tavall CI and validate without source composition. |
@@ -91,7 +91,7 @@ This record measures the module’s implementation maturity, API/integration sta
 
 ## Next Slice
 
-Record the exact PR merge and Bot outcome, then prove PostgreSQL contention/rollback and immutable package-backed MC consumption through the owning CI path.
+Revalidate the final pushed PR #29 head, refresh Tavall Bot evidence, and complete the authorized merge. Then prove PostgreSQL contention/rollback and immutable package-backed MC consumption through the owning CI path.
 
 ## Documentation Update State
 
@@ -102,8 +102,8 @@ Record the exact PR merge and Bot outcome, then prove PostgreSQL contention/roll
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | 2026-10-19 2:34 PM PDT | PR #29 main-synchronized provider check: 17 total tests, 12 passed, 5 skipped. |
-| Notion | TEMPORARY_DRIFT | [tavall-database-postgres — PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db) | 2026-10-19 2:34 PM PDT | Refresh from the current GitHub progression, then fetch to verify the 1:1 twin. |
+| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | 2026-10-19 2:51 PM PDT | PR #29 main-synchronized provider check: 17 total tests, 12 passed, 5 skipped. |
+| Notion | SYNCED | [tavall-database-postgres — PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db) | 2026-10-19 2:51 PM PDT | Refreshed from GitHub source; post-update fetch verified the current main revision, PR candidate, and provider-check evidence. |
 
 ### Update History
 
@@ -112,4 +112,5 @@ Record the exact PR merge and Bot outcome, then prove PostgreSQL contention/roll
 | 2026-09-27 5:59 PM PDT | GitHub | `CREATED` | `docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md` | — | PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4` | Created module Progression from the current main source/build/history and module README. |
 
 | 2026-10-19 2:34 PM PDT | GitHub | UPDATED | docs/progression/TAVALL_DATABASE_POSTGRES_PROGRESSION.md | Same path | PR #29 main synchronization and local provider check | Recorded 17 total tests, 12 passed, five PostgreSQL-service tests skipped; no live PostgreSQL or package acceptance is claimed. |
+| 2026-10-19 2:51 PM PDT | Notion | UPDATED | https://app.notion.com/p/3ef38458ddfd81d385a0f371aeb289db | Same page | Post-update fetch after refreshing from GitHub source. | Verified the current main revision, candidate check result, and PostgreSQL-service skips. |
 </details>

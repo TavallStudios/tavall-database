@@ -108,8 +108,8 @@ Run PostgreSQL contention/rollback on a disposable database and validate immutab
 
 | Surface | Sync State | Location | Last Updated | Evidence |
 | --- | --- | --- | --- | --- |
-| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md | 2026-10-19 2:34 PM PDT | PR #29 main synchronization and provider check evidence recorded in this progression. |
-| Notion | TEMPORARY_DRIFT | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-19 2:34 PM PDT | Refresh from the current GitHub progression, then fetch to verify the 1:1 twin. |
+| GitHub | PRIMARY | TavallStudios/tavall-database/docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md | 2026-10-19 2:51 PM PDT | PR #29 main synchronization and provider check evidence recorded in this progression. |
+| Notion | SYNCED | [Tavall Database — SYSTEM PROGRESSION](https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68) | 2026-10-19 2:51 PM PDT | Refreshed from GitHub source; post-update fetch verified the current eight-project system map, main revision, and provider-check evidence. |
 
 ### Update History
 
@@ -118,5 +118,6 @@ Run PostgreSQL contention/rollback on a disposable database and validate immutab
 | 2026-09-27 5:59 PM PDT | GitHub | `CREATED` | `docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | — | PR [#26](https://github.com/TavallStudios/tavall-database/pull/26); audited main `ec7672bc435872c999e6955c34ca90dab35bc9c4`. | Created system Progression from current module, build, and source-history evidence. |
 | 2026-10-09 2:13 PM PDT | GitHub | `UPDATED` | `docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md` | Same path | Commit [`98b9312`](https://github.com/TavallStudios/tavall-database/commit/98b9312c942c192e841e0c26183b64107fb06124) on `working/redis-api-module-20261009` | Added the Redis API module, the Redis provider role, the eight-project count, and the 2026-10-09 system timeline entry. |
 
-| 2026-10-19 2:34 PM PDT | GitHub | UPDATED | docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md | Same path | PR #29 main synchronization; local provider check result | Reconciled the system map to main bdc6778 and the Redis API/provider split; Notion post-fetch sync follows. |
+| 2026-10-19 2:34 PM PDT | GitHub | UPDATED | docs/progression/TAVALL_DATABASE_SYSTEM_PROGRESSION.md | Same path | PR #29 main synchronization; local provider check result | Reconciled the system map to main bdc6778 and the Redis API/provider split. |
+| 2026-10-19 2:51 PM PDT | Notion | UPDATED | https://app.notion.com/p/3ef38458ddfd81d0b3ebded692a9cd68 | Same page | Post-update fetch after refreshing from GitHub source. | Verified the eight-project system map, current main SHA, and provider test evidence. |
 </details>
