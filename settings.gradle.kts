@@ -1,16 +1,4 @@
 pluginManagement {
-    val architectureTestsBuild = providers.gradleProperty("tavallArchitectureTestsBuild")
-        .orElse(providers.environmentVariable("TAVALL_ARCHITECTURE_TESTS_BUILD"))
-        .orNull
-    if (!architectureTestsBuild.isNullOrBlank()) {
-        val buildDirectory = file(architectureTestsBuild).canonicalFile
-        require(buildDirectory.resolve("settings.gradle.kts").isFile) {
-            "Tavall Architecture Tests composite build is missing settings.gradle.kts at $buildDirectory"
-        }
-        includeBuild(buildDirectory) {
-            name = "tavall-architecture-tests-source"
-        }
-    }
     repositories {
         // Tavall internal artifact repository (same convention as Tavall Cloud): an explicit URL wins, and the
         // development host's internal repository is the default only where it exists.
