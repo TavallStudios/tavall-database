@@ -173,7 +173,7 @@ Contract tests are `RedisDatabaseContractTest` in `tavall-database-test-suite`, 
 - `leaseFencedWritesRejectAnExpiredHolderBeforeAndAfterTheNextHolderWrites`
 - `leaseFencedWritesNeverLowerTheStoredEpoch`
 
-Other recorded evidence: `./gradlew --write-locks clean check` succeeded; `CanonicalArchitectureTest` 1/1 and `DatabaseBuilderTypingTest` 5/5 passed; remote smoke tests were skipped because remote database environment variables are not configured.
+Historical pre-suspension evidence: `./gradlew --write-locks clean check` succeeded; `CanonicalArchitectureTest` 1/1 and `DatabaseBuilderTypingTest` 5/5 passed; remote smoke tests were skipped because remote database environment variables were not configured.
 
 Build enforcement: `verifyClientFreeApi` runs as part of `check`.
 
@@ -195,7 +195,7 @@ Build enforcement: `verifyClientFreeApi` runs as part of `check`.
 | [`tavall-database-core-contracts`](../tavall-database-core-contracts/README.md) | Upstream contract dependency (`api`). |
 | [`tavall-database-redis`](../tavall-database-redis/README.md) | Jedis provider; implements this API and registers the SPI. |
 | [`tavall-database-core`](../tavall-database-core/README.md) | Aggregates this API with the Redis provider. |
-| [`tavall-database-test-suite`](../tavall-database-test-suite/README.md) | Hosts the Redis contract tests and applies architecture tests. |
+| [`tavall-database-test-suite`](../tavall-database-test-suite/README.md) | Hosts Redis contract and provider tests; architecture-test execution is suspended organization-wide. |
 | Owning consumer runtime (Tavall Cloud, Tavall MC) | Composes the provider and consumes `IRedisDatabase`. Not named in this repository. |
 
 ## Documentation

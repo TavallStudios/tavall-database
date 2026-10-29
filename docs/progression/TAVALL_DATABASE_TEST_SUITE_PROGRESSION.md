@@ -1,5 +1,7 @@
 # tavall-database-test-suite Progression
 
+> **Current status (2026-10-28):** The module continues to own regular provider, contract, and integration tests. Organization-wide architecture-test execution is suspended; prior architecture results are historical.
+
 > **Status:** Active progression record  
 > **Document Type:** `PROGRESSION`  
 > **Progression Scope:** `MODULE`  
