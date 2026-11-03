@@ -1,5 +1,7 @@
 # Tavall Database
 
+**Technology stack inventory:** [DATA_TECH_STACK.md](DATA_TECH_STACK.md) (implementation and deployment evidence remain with their owning documents).
+
 Tavall Database is a modular Java library for shared database contracts and concrete PostgreSQL, MongoDB, Redis, and Qdrant providers.
 
 ## Why Tavall Database
