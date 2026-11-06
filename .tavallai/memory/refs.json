@@ -1,0 +1,7 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/refs-memory/v1.json",
+  "authority": "tavall-ai-memory",
+  "observedAt": "2026-10-03T09:07:30Z",
+  "plane": "Tavall Memory Plane",
+  "refs": []
+}

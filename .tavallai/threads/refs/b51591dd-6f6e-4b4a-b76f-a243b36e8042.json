@@ -1,0 +1,10 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/thread-ref/v1.json",
+  "appDataDir": "/home/ubuntu/.gemini/antigravity-cli",
+  "associatedAt": "2026-10-03T09:07:30Z",
+  "provider": "antigravity-cli",
+  "runs": [
+    "run-20261003-tavallai-rollout"
+  ],
+  "threadId": "b51591dd-6f6e-4b4a-b76f-a243b36e8042"
+}

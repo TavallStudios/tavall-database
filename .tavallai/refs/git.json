@@ -1,0 +1,7 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/refs-git/v1.json",
+  "authority": "github.com/TavallStudios/tavall-database",
+  "currentCommit": "f8cdf3ab8d336683766377936bfdcad2e97a4bc1",
+  "defaultBranch": "main",
+  "observedAt": "2026-10-04T05:25:30Z"
+}

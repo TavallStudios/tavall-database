@@ -1,0 +1,59 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/v1.json",
+  "authorities": {
+    "docs": {
+      "authority": "github.com/TavallStudios/tavall-docs",
+      "observedAt": "2026-10-04T05:25:30Z",
+      "ref": "refs/heads/main",
+      "revision": "9b6fe883d13bce11823d7e37902e8507ef68a58b"
+    },
+    "git": {
+      "authority": "github.com/TavallStudios/tavall-database",
+      "observedAt": "2026-10-04T05:25:30Z",
+      "ref": "refs/heads/working/postgres-advisory-transaction-lock",
+      "revision": "f8cdf3ab8d336683766377936bfdcad2e97a4bc1"
+    },
+    "ledger": {
+      "authority": "tavall-agent-ledger",
+      "observedAt": "2026-10-03T09:07:30Z",
+      "ref": "active-worker-claims"
+    },
+    "memory": {
+      "authority": "tavall-ai-memory",
+      "observedAt": "2026-10-03T09:07:30Z",
+      "ref": "memory-plane"
+    }
+  },
+  "entrypoints": {
+    "refs": {
+      "cloud": "refs/cloud.json",
+      "git": "refs/git.json",
+      "memory": "memory/refs.json"
+    },
+    "runs": {
+      "active": "runs/active.json",
+      "history": "runs/history.json"
+    },
+    "threads": "threads/index.json",
+    "work": {
+      "current": "work/current.json",
+      "history": "work/history.json"
+    }
+  },
+  "modules": [
+    "tavall-database-core-contracts",
+    "tavall-database-postgres",
+    "tavall-database-mongo",
+    "tavall-database-redis",
+    "tavall-database-qdrant",
+    "tavall-database-core",
+    "tavall-database-test-suite"
+  ],
+  "scope": {
+    "name": "tavall-database",
+    "path": ".",
+    "repository": "TavallStudios/tavall-database",
+    "type": "REPOSITORY_ROOT"
+  },
+  "version": 1
+}

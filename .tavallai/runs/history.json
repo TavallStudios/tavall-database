@@ -1,0 +1,28 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/run-history/v1.json",
+  "runs": [
+    {
+      "agent": "tavall-agent-provenance",
+      "agentMode": "ROLE",
+      "completedAt": "2026-10-03T09:07:30Z",
+      "git": {
+        "authority": "github.com/TavallStudios/tavall-database",
+        "branch": "main",
+        "headCommit": "91e9a879e7747a79319595680c08c300fec3c5b8"
+      },
+      "handoff": "runs/handoffs/run-20261003-tavallai-rollout.json",
+      "ledger": {
+        "authority": "tavall-agent-ledger",
+        "workerId": "worker-20261003-b51591dd"
+      },
+      "runId": "run-20261003-tavallai-rollout",
+      "scope": {
+        "path": ".",
+        "repository": "TavallStudios/tavall-database"
+      },
+      "startedAt": "2026-10-03T09:00:00Z",
+      "status": "COMPLETE",
+      "threadId": "b51591dd-6f6e-4b4a-b76f-a243b36e8042"
+    }
+  ]
+}

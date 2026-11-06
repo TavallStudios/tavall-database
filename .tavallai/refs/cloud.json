@@ -1,0 +1,9 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/refs-cloud/v1.json",
+  "authority": "tavall-cloud/CONTROL",
+  "executor": "ubuntu@dev-storage",
+  "lane": "DEVELOPMENT",
+  "node": "dev-storage",
+  "observedAt": "2026-10-03T09:07:30Z",
+  "workspace": "/srv/dev-storage/workspaces/tavall-database/repo_root"
+}

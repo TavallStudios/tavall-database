@@ -1,0 +1,11 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/work-history/v1.json",
+  "history": [
+    {
+      "completedAt": "2026-10-03T09:07:30Z",
+      "status": "COMPLETE",
+      "title": "Canonical .tavallai AI-work provenance architecture rollout",
+      "workId": "work-20261003-provenance-rollout"
+    }
+  ]
+}

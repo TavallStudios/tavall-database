@@ -1,0 +1,12 @@
+{
+  "$schema": "https://tavall.org/schemas/tavallai/threads-index/v1.json",
+  "threads": [
+    {
+      "id": "b51591dd-6f6e-4b4a-b76f-a243b36e8042",
+      "observedAt": "2026-10-03T09:07:30Z",
+      "provider": "antigravity-cli",
+      "ref": "threads/refs/b51591dd-6f6e-4b4a-b76f-a243b36e8042.json",
+      "title": "Canonical .tavallai AI work provenance architecture rollout"
+    }
+  ]
+}
