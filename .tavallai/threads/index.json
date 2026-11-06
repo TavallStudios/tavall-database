@@ -1,0 +1,9 @@
+{
+  "threads": [
+    {
+      "id": "78fdf864-9232-46dc-b9ec-1e3a0b44ff76",
+      "provider": "claude-code",
+      "ref": "threads/refs/78fdf864-9232-46dc-b9ec-1e3a0b44ff76.json"
+    }
+  ]
+}

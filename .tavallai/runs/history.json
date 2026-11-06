@@ -1,0 +1,67 @@
+{
+  "runs": [
+    {
+      "agent": "tavall-orchestrator",
+      "agentMode": "ROLE",
+      "finishedAt": "2026-10-10T02:04:36Z",
+      "git": {
+        "authority": "github.com/TavallStudios/tavall-database",
+        "observedAt": "2026-10-10T02:04:36Z",
+        "ref": "refs/heads/working/redis-api-module-20261009",
+        "revision": "fc02c19c288e2bd63d447664fbd58a8e20ec06dc"
+      },
+      "ledger": {
+        "agentId": "opus-nlew-fs-redis-migration-20261009",
+        "authority": "tavall-agent-ledger",
+        "claims": [
+          "TavallStudios/tavall-nlew (new repository, all modules)",
+          "TavallStudios/tavall-cloud working/nlew-consumer-20261009",
+          "TavallStudios/tavall-filesystem PR #2 branch",
+          "TavallStudios/tavall-database working/redis-api-module-20261009",
+          "TavallStudios/tavall-docs working/nlew-filesystem-redis-ownership-20261009"
+        ],
+        "excludes": [
+          "tavall-cloud PRs #424 #430 #431 #432 and networking extraction (other workers)"
+        ],
+        "subWorkers": [
+          "haiku-nlew-inventory-20261009",
+          "haiku-fs-inventory-20261009",
+          "haiku-redis-inventory-20261009",
+          "haiku-build-conventions-20261009"
+        ],
+        "taskId": "nlew-filesystem-redis-migration-20261009",
+        "workerId": "claude-code-78fdf864-9232-46dc-b9ec-1e3a0b44ff76"
+      },
+      "runId": "run-20261009-nlew-filesystem-redis-migration",
+      "scope": {
+        "path": ".",
+        "repository": "TavallStudios/tavall-database",
+        "type": "REPOSITORY_ROOT"
+      },
+      "startedAt": "2026-10-09T20:59:03Z",
+      "status": "COMPLETE",
+      "threadId": "78fdf864-9232-46dc-b9ec-1e3a0b44ff76",
+      "title": "NLEW extraction, Filesystem completion, Database Redis API migration",
+      "transitions": [
+        {
+          "at": "2026-10-09T20:59:03Z",
+          "note": "ledger claim registered; inventory started",
+          "phase": "START",
+          "revision": "d637362444fa02ce49f4b74ac52b8f5a8aec3670"
+        },
+        {
+          "at": "2026-10-09T22:02:25Z",
+          "note": "PR #30 opened; review fixes (atomic CAS results, lease fencing tokens) at 19cf487; check green",
+          "phase": "UPDATE",
+          "revision": "19cf487b93d68f1dbcf5ec6fae1b28145763bb6f"
+        },
+        {
+          "at": "2026-10-10T02:04:36Z",
+          "note": "Redis API split complete; PR #30 merged (7c768ca); 1.1.0 published to internal repository",
+          "phase": "FINALIZE",
+          "revision": "fc02c19c288e2bd63d447664fbd58a8e20ec06dc"
+        }
+      ]
+    }
+  ]
+}

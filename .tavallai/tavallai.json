@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TavallStudios/tavall-docs/main/docs/schemas/tavallai-directory.schema.json",
+  "authorities": {
+    "git": {
+      "authority": "github.com/TavallStudios/tavall-database",
+      "observedAt": "2026-10-10T02:04:36Z",
+      "ref": "refs/heads/working/redis-api-module-20261009",
+      "revision": "fc02c19c288e2bd63d447664fbd58a8e20ec06dc"
+    },
+    "ledger": {
+      "authority": "tavall-agent-ledger",
+      "ref": "active-worker-claims"
+    },
+    "memory": {
+      "authority": "tavall-ai-memory",
+      "ref": "memory-plane"
+    }
+  },
+  "directoryType": "PROVENANCE",
+  "entrypoints": {
+    "runs": {
+      "active": "runs/active.json",
+      "history": "runs/history.json"
+    },
+    "threads": "threads/index.json"
+  },
+  "schemaVersion": 1,
+  "scope": {
+    "name": "tavall-database",
+    "path": ".",
+    "repository": "TavallStudios/tavall-database",
+    "type": "REPOSITORY_ROOT"
+  },
+  "version": 1
+}
